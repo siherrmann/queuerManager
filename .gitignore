@@ -29,3 +29,4 @@ go.work.sum
 
 # Manager specific
 uploads/
+node_modules/
