@@ -1,4 +1,4 @@
-package main
+package queuerManager
 
 import (
 	"net/http"

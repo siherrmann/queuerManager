@@ -1,4 +1,4 @@
-package main
+package queuerManager
 
 import (
 	"context"
@@ -19,12 +19,6 @@ import (
 	qh "github.com/siherrmann/queuer/helper"
 	qmodel "github.com/siherrmann/queuer/model"
 )
-
-// main is the entry point of the manager service. It initializes the manager handler,
-// sets up routes, and starts the Echo server with the port from the environment variable QUEUER_MANAGER_PORT.
-func main() {
-	ManagerServer(helper.GetEnvOrDefault("QUEUER_MANAGER_PORT", "3000"), 1)
-}
 
 // ManagerServer initializes the manager handler, sets up routes, and starts the Echo server.
 func ManagerServer(port string, maxConcurrency int) {
