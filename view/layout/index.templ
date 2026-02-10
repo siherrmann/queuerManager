@@ -1,0 +1,70 @@
+package layout
+
+templ Index(title string, polling ...string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<title>{ title }</title>
+			<meta name="description" content="Your custom backend"/>
+			<meta name="keywords" content="backend, fast, easy, build, go, htmx, templ"/>
+			<meta name="author" content="Simon Herrmann"/>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			// styles
+			// <link rel="stylesheet" href="/static/styles/output.css" media="print" onload="this.media='all'"/>
+			<link rel="stylesheet" href="/static/styles/output.css"/>
+			<link rel="stylesheet" href="/static/styles/prism.css"/>
+			// scripts
+			<script src="/static/scripts/htmx.min.js"></script>
+			<script src="/static/scripts/htmxLoading.min.js" defer></script>
+			<script async src="/static/scripts/hyperscript.min.js" defer></script>
+			<script src="/static/scripts/prism.js"></script>
+			// dev logging
+			// <script>
+			// 	htmx.logger = function(elt, event, data) {
+			// 		if(console) {
+			// 			console.log(event, elt, data);
+			// 		}
+			// 	}
+			// </script>
+			<style>
+					body {
+						font-family: 'Inter', sans-serif;
+						background-color: #f3f4f6; /* Tailwind gray-100 */
+					}
+					/* Custom class for the active sidebar link background */
+					.sidebar-active {
+						background-color: rgba(255, 255, 255, 0.08); /* Semi-transparent white hover effect */
+					}
+					/* Dotted border style for the upload area */
+					.border-dashed-upload {
+						border: 2px dashed #9ca3af; /* Tailwind gray-400 */
+					}
+				</style>
+		</head>
+		// <body class="flex h-screen antialiased"></body>
+		// class="flex w-screen min-h-screen background_secondary"
+		// hx-boost="true"
+		<body
+			id="body"
+			class="flex h-screen antialiased"
+			_="on load if cookies.darkMode is 'true' add .dark to body"
+			hx-on::load="js: Prism.highlightAll()"
+			if len(polling) > 0 {
+				hx-get={ polling[0] }
+				hx-trigger="every 2s"
+			}
+		>
+			// <img alt="loading..." id="body-loading" class="htmx-indicator brightness-0 dark:brightness-200" width="30" height="20" src="/static/images/bars.svg"/>
+			{ children... }
+			<div tabindex="-1" id="global-popup"></div>
+			<div tabindex="-1" id="global-error"></div>
+		</body>
+	</html>
+}
+
+templ InnerBody() {
+	<main class="flex-1 p-4 md:p-8 overflow-y-auto">
+		{ children... }
+	</main>
+}

@@ -1,0 +1,25 @@
+package components
+
+import (
+	"bytes"
+	"encoding/json"
+)
+
+func dataToJsonCode(data interface{}) string {
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		return "Could not convert data to Json."
+	}
+
+	var buffer bytes.Buffer
+	err = json.Indent(&buffer, jsonBytes, "", "\t")
+	if err != nil {
+		return "Could not indent Json."
+	}
+
+	return buffer.String()
+}
+
+templ JsonCodeView(data interface{}) {
+	<pre hx-on::load="js: Prism.highlightAll()" class="line-numbers card background_dark m-0"><code class="language-json">{ dataToJsonCode(data) }</code></pre>
+}

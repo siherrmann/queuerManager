@@ -1,0 +1,455 @@
+package screens
+
+import (
+	"encoding/json"
+	"fmt"
+	vm "github.com/siherrmann/validator/model"
+	"manager/model"
+	"manager/view/components"
+	"manager/view/layout"
+	"strings"
+)
+
+func tasksToUniversalMappers(tasks []*model.Task) []model.Mapper {
+	var mappers []model.Mapper
+	for _, task := range tasks {
+		mapper := model.UniversalMapper{
+			Data: []model.UniversalSubMapper{
+				{Key: "rid", Data: task.RID, Link: fmt.Sprintf("/task?rid=%v", task.RID.String())},
+				{Key: "key", Data: task.Key},
+				{Key: "name", Data: task.Name},
+				{Key: "created_at", Data: task.CreatedAt.Format("2006-01-02")},
+				{Key: "updated_at", Data: task.UpdatedAt.Format("2006-01-02")},
+			},
+		}
+		mappers = append(mappers, mapper)
+	}
+	return mappers
+}
+
+func validationsToJSON(validations []vm.Validation) string {
+	if len(validations) == 0 {
+		return "[]"
+	}
+	data, err := json.MarshalIndent(validations, "", "  ")
+	if err != nil {
+		return "[]"
+	}
+	return string(data)
+}
+
+templ Task(task *model.Task) {
+	@layout.Index("Task Details") {
+		@layout.MenuSide("Tasks")
+		@layout.InnerBody() {
+			<!-- CARD: Task Information -->
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@components.Topbar(
+					"Tasks",
+					nil,
+					components.MenuEdit(
+						components.ButtonConfig{ID: "table_button_reload", Color: components.BUTTON_PRIMARY, Icon: "refresh", Name: "Reload", HxGet: "/task?rid=" + task.RID.String()},
+						[]components.ButtonConfig{
+							{ID: "table_button_update_task", Color: components.BUTTON_PRIMARY, Icon: "edit", Name: "Update", HxGet: "/task/updateTaskPopup?rid=" + task.RID.String()},
+							{ID: "table_button_delete_task", Color: components.BUTTON_RED, Icon: "delete", Name: "Delete", HxGet: "/task/deleteTaskPopup?rid=" + task.RID.String()},
+						},
+					),
+				)
+				<!-- Details Grid -->
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Task RID</span>
+						<span class="font-mono text-gray-800 break-all">{ task.RID.String() }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Task Key</span>
+						<span class="font-mono text-gray-800">{ task.Key }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Task Name</span>
+						<span class="font-semibold text-gray-800">{ task.Name }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Created At</span>
+						<span class="text-gray-800">{ task.CreatedAt.Format("2006-01-02 15:04") }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Updated At</span>
+						<span class="text-gray-800">{ task.UpdatedAt.Format("2006-01-02 15:04") }</span>
+					</div>
+					<div class="md:col-span-2 lg:col-span-3 text-sm">
+						<span class="font-medium text-gray-500 block mb-1">Description</span>
+						if task.Description != "" {
+							<p class="text-gray-800">{ task.Description }</p>
+						} else {
+							<p class="text-gray-400 italic">No description provided</p>
+						}
+					</div>
+					<div class="md:col-span-2 lg:col-span-3 text-sm">
+						<span class="font-medium text-gray-500 block mb-1">Input Parameters</span>
+						@components.JsonCodeView(task.InputParameters)
+					</div>
+					<div class="md:col-span-2 lg:col-span-3 text-sm">
+						<span class="font-medium text-gray-500 block mb-1">Input Parameters Keyed</span>
+						@components.JsonCodeView(task.InputParametersKeyed)
+					</div>
+					<div class="md:col-span-2 lg:col-span-3 text-sm">
+						<span class="font-medium text-gray-500 block mb-1">Output Parameters</span>
+						@components.JsonCodeView(task.OutputParameters)
+					</div>
+				</div>
+			</div>
+		}
+	}
+}
+
+templ Tasks(tasks []*model.Task, search string) {
+	@layout.Index("Tasks") {
+		@layout.MenuSide("Tasks")
+		@layout.InnerBody() {
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@TasksTable(tasks, search)
+			</div>
+		}
+	}
+}
+
+templ TasksTable(tasks []*model.Task, search string) {
+	@components.TableFull(
+		&components.TableFullConfig{
+			ID:            "tasks_table",
+			Name:          "Tasks",
+			Trigger:       "getTasks",
+			TriggerTarget: "tasks_table",
+			Selectable:    true,
+			Topbar: components.Topbar(
+				"Tasks",
+				components.InputSearch(
+					"task_search",
+					search,
+					"Search tasks...",
+					"/tasks",
+				),
+				components.MenuEdit(
+					components.ButtonConfig{ID: "table_button_add_task", Color: components.BUTTON_PRIMARY, Icon: "add", Name: "Add", HxGet: "/task/addTaskPopup", Disabled: false},
+					[]components.ButtonConfig{
+						{ID: "details_button_tasks_table", Color: components.BUTTON_PRIMARY, Icon: "article", Name: "Details", HxGet: "/task", HxVals: "js:{rid: getSelectedValues('full_table_tasks_table')}", HScript: components.HscriptOne, Disabled: true},
+						{ID: "table_button_update_task", Color: components.BUTTON_PRIMARY, Icon: "edit", Name: "Update", HxGet: "/task/updateTaskPopup", HxVals: "js:{rid: getSelectedValues('full_table_tasks_table')}", HScript: components.HscriptOne, Disabled: true},
+						{ID: "table_button_import_task", Color: components.BUTTON_PRIMARY, Icon: "upload", Name: "Import", HxGet: "/task/importTaskPopup", Disabled: false},
+						{ID: "table_button_export_task", Color: components.BUTTON_PRIMARY, Icon: "download", Name: "Export", HScript: "on click call downloadExport('/api/task/exportTask', getSelectedValues('full_table_tasks_table')) " + components.HscriptOneOrMore, Disabled: true},
+					},
+					[]components.ButtonConfig{
+						{ID: "table_button_delete_task", Color: components.BUTTON_RED, Icon: "delete", Name: "Delete", HxGet: "/task/deleteTaskPopup", HxVals: "js:{rid: getSelectedValues('full_table_tasks_table')}", HScript: components.HscriptOneOrMore, Disabled: true},
+					},
+				),
+			),
+			Columns: []model.KeyValuePair{
+				{Key: "rid", Value: "Task ID"},
+				{Key: "key", Value: "Key"},
+				{Key: "name", Value: "Name"},
+				{Key: "created_at", Value: "Created At"},
+				{Key: "updated_at", Value: "Updated At"},
+			},
+			Rows: tasksToUniversalMappers(tasks),
+		},
+	)
+}
+
+templ AddTaskPopup() {
+	@components.Popup("Add Task", 50) {
+		<div role="dialog" class="absolute z-20 top-4 bottom-4 left-0 right-0 w-full max-w-[600px] max-h-[calc(100vh-2rem)] mx-auto flex flex-col">
+			@components.PopupHeaderInfo("Add Task")
+			<div class="px-6 py-4 rounded-b border border-t-0 border-indigo-500 bg-white overflow-y-auto">
+				@components.Form(
+					components.FormConf{
+						HxPost: "/api/task/addTask",
+						Class:  "space-y-4",
+					},
+				) {
+					<!-- Task Key -->
+					<div>
+						<label for="add_task_key" class="block text-sm font-medium text-gray-700 mb-1">Task Key</label>
+						<input
+							autofocus
+							type="text"
+							id="add_task_key"
+							name="key"
+							required
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder="unique_task_identifier"
+						/>
+						<p class="mt-1 text-xs text-gray-500">Unique identifier for this task</p>
+					</div>
+					<!-- Task Name -->
+					<div>
+						<label for="add_task_name" class="block text-sm font-medium text-gray-700 mb-1">Task Name</label>
+						<input
+							type="text"
+							id="add_task_name"
+							name="name"
+							required
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder="Display Name"
+						/>
+					</div>
+					<!-- Description -->
+					<div>
+						<label for="add_task_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+						<textarea
+							id="add_task_description"
+							name="description"
+							rows="3"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder="Task description (optional)"
+						></textarea>
+					</div>
+					<!-- Validations -->
+					<div>
+						<label for="add_task_validations" class="block text-sm font-medium text-gray-700 mb-1">Validations (Parameters) - JSON</label>
+						<textarea
+							id="add_task_validations"
+							name="validations"
+							rows="6"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder='[{"key": "input", "type": "string", "requirement": "min1"}]'
+						></textarea>
+						<p class="mt-1 text-xs text-gray-500">Enter positional parameter validations as a JSON array</p>
+					</div>
+					<!-- Validations Keyed -->
+					<div>
+						<label for="add_task_validations_keyed" class="block text-sm font-medium text-gray-700 mb-1">Validations Keyed (Keyed Parameters) - JSON</label>
+						<textarea
+							id="add_task_validations_keyed"
+							name="validations_keyed"
+							rows="6"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder='[{"key": "model_name", "type": "string", "requirement": "min1"}]'
+						></textarea>
+						<p class="mt-1 text-xs text-gray-500">Enter keyed parameter validations as a JSON array</p>
+					</div>
+					<!-- Output Parameters -->
+					<div>
+						<label for="add_task_output_parameters" class="block text-sm font-medium text-gray-700 mb-1">Output Parameters - JSON</label>
+						<textarea
+							id="add_task_output_parameters"
+							name="output_parameters"
+							rows="6"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder='[{"key": "result", "type": "string"}]'
+						></textarea>
+						<p class="mt-1 text-xs text-gray-500">Enter output parameter definitions as a JSON array</p>
+					</div>
+					<!-- Actions -->
+					<div class="flex justify-end gap-3 pt-2">
+						<button
+							type="button"
+							_="on click trigger closeAddTask"
+							class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 text-white bg-indigo-700 rounded-lg hover:bg-indigo-600 transition"
+						>
+							Add Task
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+templ UpdateTaskPopup(task *model.Task) {
+	@components.Popup("Update Task", 50) {
+		<div role="dialog" class="absolute z-20 top-4 bottom-4 left-0 right-0 w-full max-w-[600px] max-h-[calc(100vh-2rem)] mx-auto flex flex-col">
+			@components.PopupHeaderInfo("Update Task")
+			<div class="px-6 py-4 rounded-b border border-t-0 border-indigo-500 bg-white overflow-y-auto">
+				@components.Form(
+					components.FormConf{
+						HxPost: fmt.Sprintf("/api/task/updateTask?rid=%s", task.RID.String()),
+						Class:  "space-y-4",
+					},
+				) {
+					<!-- Task Key -->
+					<div>
+						<label for="update_task_key" class="block text-sm font-medium text-gray-700 mb-1">Task Key</label>
+						<input
+							autofocus
+							type="text"
+							id="update_task_key"
+							name="key"
+							value={ task.Key }
+							required
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder="unique_task_identifier"
+						/>
+						<p class="mt-1 text-xs text-gray-500">Unique identifier for this task</p>
+					</div>
+					<!-- Task Name -->
+					<div>
+						<label for="update_task_name" class="block text-sm font-medium text-gray-700 mb-1">Task Name</label>
+						<input
+							type="text"
+							id="update_task_name"
+							name="name"
+							value={ task.Name }
+							required
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder="Display Name"
+						/>
+					</div>
+					<!-- Description -->
+					<div>
+						<label for="update_task_description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+						<textarea
+							id="update_task_description"
+							name="description"
+							rows="3"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder="Task description (optional)"
+						>{ task.Description }</textarea>
+					</div>
+					<!-- Validations -->
+					<div>
+						<label for="update_task_validations" class="block text-sm font-medium text-gray-700 mb-1">Validations (Parameters) - JSON</label>
+						<textarea
+							id="update_task_validations"
+							name="validations"
+							rows="6"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder='[{"key": "input", "type": "string", "requirement": "min1"}]'
+						>{ validationsToJSON(task.InputParameters) }</textarea>
+						<p class="mt-1 text-xs text-gray-500">Enter positional parameter validations as a JSON array</p>
+					</div>
+					<!-- Validations Keyed -->
+					<div>
+						<label for="update_task_validations_keyed" class="block text-sm font-medium text-gray-700 mb-1">Validations Keyed (Keyed Parameters) - JSON</label>
+						<textarea
+							id="update_task_validations_keyed"
+							name="validations_keyed"
+							rows="6"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder='[{"key": "model_name", "type": "string", "requirement": "min1"}]'
+						>{ validationsToJSON(task.InputParametersKeyed) }</textarea>
+						<p class="mt-1 text-xs text-gray-500">Enter keyed parameter validations as a JSON array</p>
+					</div>
+					<!-- Output Parameters -->
+					<div>
+						<label for="update_task_output_parameters" class="block text-sm font-medium text-gray-700 mb-1">Output Parameters - JSON</label>
+						<textarea
+							id="update_task_output_parameters"
+							name="output_parameters"
+							rows="6"
+							class="w-full px-3 py-2 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+							placeholder='[{"key": "result", "type": "string"}]'
+						>{ validationsToJSON(task.OutputParameters) }</textarea>
+						<p class="mt-1 text-xs text-gray-500">Enter output parameter definitions as a JSON array</p>
+					</div>
+					<!-- Result message area -->
+					<div id="update_task_result"></div>
+					<!-- Actions -->
+					<div class="flex justify-end gap-3 pt-2">
+						<button
+							type="button"
+							_="on click trigger closeUpdateTaskPopup"
+							class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 text-white bg-indigo-700 rounded-lg hover:bg-indigo-600 transition"
+						>
+							Update Task
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+templ ImportTaskPopup() {
+	@components.Popup("Import Tasks", 50) {
+		<div role="dialog" class="absolute z-20 top-4 bottom-4 left-0 right-0 w-full max-w-[500px] max-h-[calc(100vh-2rem)] mx-auto flex flex-col">
+			@components.PopupHeaderInfo("Import Tasks")
+			<div class="px-6 py-4 rounded-b border border-t-0 border-indigo-500 bg-white overflow-y-auto">
+				@components.Form(
+					components.FormConf{
+						HxPost:     "/api/task/importTask",
+						HxEncoding: "multipart/form-data",
+						Class:      "space-y-4",
+					},
+				) {
+					<!-- File Upload -->
+					@components.InputFile("task_file", "task_file", "Task JSON File", ".json,application/json", false)
+					<p class="text-xs text-gray-500">Upload a JSON file containing an array of task configurations</p>
+					<!-- Result message area -->
+					<div id="import_task_result"></div>
+					<!-- Actions -->
+					<div class="flex justify-end gap-3 pt-2">
+						<button
+							type="button"
+							_="on click trigger closeImportTasks"
+							class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 text-white bg-indigo-700 rounded-lg hover:bg-indigo-600 transition"
+						>
+							Import
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+templ DeleteTaskPopup(rids []string) {
+	@components.Popup("Delete Task", 50) {
+		<div role="dialog" class="absolute z-20 top-4 bottom-4 left-0 right-0 w-full max-w-[500px] max-h-[calc(100vh-2rem)] mx-auto flex flex-col">
+			@components.PopupHeaderError("Delete Tasks")
+			<div class="px-6 py-4 rounded-b border border-t-0 border-red-600 bg-white overflow-y-auto">
+				@components.Form(
+					components.FormConf{
+						HxPost: fmt.Sprintf("/api/task/deleteTasks?rid=%s", strings.Join(rids, "&rid=")),
+						Class:  "space-y-4",
+					},
+				) {
+					for _, rid := range rids {
+						<input type="hidden" name="rid" value={ rid }/>
+					}
+					<div class="text-gray-700">
+						<p class="mb-2">Are you sure you want to delete these tasks?</p>
+						<ul class="list-disc list-inside">
+							for _, rid := range rids {
+								<li class="font-mono text-sm">{ rid }</li>
+							}
+						</ul>
+					</div>
+					<!-- Actions -->
+					<div class="flex justify-end gap-3 pt-2">
+						<button
+							type="button"
+							_="on click trigger closeDeleteTaskPopup"
+							class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition"
+						>
+							Delete
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}

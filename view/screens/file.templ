@@ -1,0 +1,215 @@
+package screens
+
+import (
+	"fmt"
+	"manager/model"
+	"manager/upload"
+	"manager/view/components"
+	"manager/view/layout"
+	"strings"
+)
+
+func filesToUniversalMappers(files []upload.File) []model.Mapper {
+	var mappers []model.Mapper
+	for _, file := range files {
+		mapper := model.UniversalMapper{
+			Data: []model.UniversalSubMapper{
+				{Key: "name", Data: file.Name, Link: fmt.Sprintf("/file?name=%s", file.Name)},
+				{Key: "mimetype", Data: file.MimeType},
+				{Key: "size", Data: fmt.Sprintf("%.2f MB", float64(file.Size)/(1024*1024))},
+			},
+		}
+		mappers = append(mappers, mapper)
+	}
+	return mappers
+}
+
+templ FileIcon(mimeType string) {
+	if strings.HasPrefix(mimeType, "image/") {
+		<span class="material-icons">image</span>
+	} else if strings.HasPrefix(mimeType, "video/") {
+		<span class="material-icons">videocam</span>
+	} else if strings.HasPrefix(mimeType, "audio/") {
+		<span class="material-icons">audiotrack</span>
+	} else {
+		<span class="material-icons">description</span>
+	}
+}
+
+templ File(file upload.File) {
+	@layout.Index("File Details") {
+		@layout.MenuSide("Files")
+		@layout.InnerBody() {
+			<!-- CARD: File Information -->
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@components.Topbar(
+					"File",
+					nil,
+					components.MenuEdit(
+						components.ButtonConfig{ID: "table_button_reload", Color: components.BUTTON_PRIMARY, Icon: "refresh", Name: "Reload", HxGet: "/file?name=" + file.Name},
+						[]components.ButtonConfig{
+							{ID: "table_button_delete_file", Color: components.BUTTON_RED, Icon: "delete", Name: "Delete", HxGet: "/file/deleteFilePopup?name=" + file.Name},
+						},
+					),
+				)
+				<!-- Details Grid -->
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-6">
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">File Name</span>
+						<span class="font-mono text-gray-800 break-all">{ file.Name }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">MIME Type</span>
+						<span class="text-gray-800">{ file.MimeType }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Size</span>
+						<span class="text-gray-800">{ fmt.Sprintf("%.2f MB", float64(file.Size)/(1024*1024)) }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Icon</span>
+						<span class="text-gray-800">
+							@FileIcon(file.MimeType)
+						</span>
+					</div>
+				</div>
+			</div>
+		}
+	}
+}
+
+templ Files(files []upload.File, search string) {
+	@layout.Index("Files") {
+		@layout.MenuSide("Files")
+		@layout.InnerBody() {
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@FilesTable(files, search)
+			</div>
+		}
+	}
+}
+
+templ FilesTable(files []upload.File, search string) {
+	@components.TableFull(
+		&components.TableFullConfig{
+			ID:            "files_table",
+			Name:          "Files",
+			Trigger:       "getFiles",
+			TriggerTarget: "files_table",
+			Selectable:    true,
+			Topbar: components.Topbar(
+				"Files",
+				components.InputSearch(
+					"file_search",
+					search,
+					"Search files...",
+					"/files",
+				),
+				components.MenuEdit(
+					components.ButtonConfig{ID: "table_button_add_file", Color: components.BUTTON_PRIMARY, Icon: "add", Name: "Add", HxGet: "/file/addFilePopup", Disabled: false},
+					[]components.ButtonConfig{
+						{ID: "table_button_details_file", Color: components.BUTTON_PRIMARY, Icon: "article", Name: "Details", HxGet: "/file", HxVals: "js:{name: getSelectedValues('full_table_files_table')}", HScript: components.HscriptOne, Disabled: true},
+					},
+					[]components.ButtonConfig{
+						{ID: "table_button_delete_file", Color: components.BUTTON_RED, Icon: "delete", Name: "Delete", HxGet: "/file/deleteFilePopup", HxVals: "js:{name: getSelectedValues('full_table_files_table')}", HScript: components.HscriptOneOrMore, Disabled: true},
+					},
+				),
+			),
+			Columns: []model.KeyValuePair{
+				{Key: "name", Value: "File Name"},
+				{Key: "mimetype", Value: "MIME Type"},
+				{Key: "size", Value: "Size"},
+			},
+			Rows: filesToUniversalMappers(files),
+		},
+	)
+}
+
+templ AddFilePopup() {
+	@components.Popup("Add File", 50) {
+		<div role="dialog" class="absolute z-20 top-4 bottom-4 left-0 right-0 w-full max-w-[600px] max-h-[calc(100vh-2rem)] mx-auto flex flex-col">
+			@components.PopupHeaderInfo("Add File")
+			<div class="px-6 py-4 rounded-b border border-t-0 border-indigo-500 bg-white overflow-y-auto">
+				@components.Form(
+					components.FormConf{
+						HxPost:     "/api/file/uploadFiles",
+						HxEncoding: "multipart/form-data",
+						HScript:    "on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100 on closeAddFile htmx.trigger(me, 'htmx:abort')",
+						Class:      "space-y-4",
+					},
+				) {
+					<!-- Drag & Drop Area with File List -->
+					@components.InputFile("files", "files", "Select Files", "", true)
+					<!-- Upload Progress Bar -->
+					<div class="w-full">
+						<progress
+							id="progress"
+							value="0"
+							max="100"
+						></progress>
+					</div>
+					<!-- Actions -->
+					<div class="flex justify-end gap-3 pt-2">
+						<button
+							type="button"
+							_="on click trigger closeAddFile"
+							class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 text-white bg-indigo-700 rounded-lg hover:bg-indigo-600 transition"
+						>
+							Upload
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+templ DeleteFilePopup(names []string) {
+	@components.Popup("Delete File", 50) {
+		<div role="dialog" class="absolute z-20 top-4 bottom-4 left-0 right-0 w-full max-w-[500px] max-h-[calc(100vh-2rem)] mx-auto flex flex-col">
+			@components.PopupHeaderError("Delete File")
+			<div class="px-6 py-4 rounded-b border border-t-0 border-red-600 bg-white overflow-y-auto">
+				@components.Form(
+					components.FormConf{
+						HxPost: fmt.Sprintf("/api/file/deleteFiles?%s", strings.Join(names, "&name=")),
+						Class:  "space-y-4",
+					},
+				) {
+					for _, name := range names {
+						<input type="hidden" name="names" value={ name }/>
+					}
+					<div class="text-gray-700">
+						<p class="mb-2">Are you sure you want to delete these files?</p>
+						<ul class="list-disc list-inside">
+							for _, name := range names {
+								<li class="font-mono text-sm break-all">{ name }</li>
+							}
+						</ul>
+					</div>
+					<!-- Actions -->
+					<div class="flex justify-end gap-3 pt-2">
+						<button
+							type="button"
+							_="on click trigger closeDeleteFile"
+							class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition"
+						>
+							Cancel
+						</button>
+						<button
+							type="submit"
+							class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700 transition"
+						>
+							Delete
+						</button>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}

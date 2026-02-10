@@ -1,0 +1,122 @@
+package screens
+
+import (
+	"fmt"
+
+	qm "github.com/siherrmann/queuer/model"
+	"manager/model"
+	"manager/view/components"
+	"manager/view/layout"
+)
+
+func workersToUniversalMappers(workers []*qm.Worker) []model.Mapper {
+	var mappers []model.Mapper
+	for _, worker := range workers {
+		mapper := model.UniversalMapper{
+			Data: []model.UniversalSubMapper{
+				{Key: "rid", Data: worker.RID.String(), Link: fmt.Sprintf("/worker?rid=%s", worker.RID.String())},
+				{Key: "name", Data: fmt.Sprint(worker.Name)},
+				{Key: "status", Data: worker.Status, ViewType: "status"},
+				{Key: "created_at", Data: worker.CreatedAt.Format("2006-01-02 15:04")},
+				{Key: "updated_at", Data: worker.UpdatedAt.Format("2006-01-02 15:04")},
+			},
+		}
+		mappers = append(mappers, mapper)
+	}
+	return mappers
+}
+
+templ Worker(worker *qm.Worker) {
+	@layout.Index("Worker Details") {
+		@layout.MenuSide("Workers")
+		@layout.InnerBody() {
+			<!-- CARD: Worker Information -->
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@components.Topbar(
+					"Worker",
+					nil,
+					components.MenuEdit(
+						components.ButtonConfig{ID: "worker_button_reload", Color: components.BUTTON_PRIMARY, Name: "Reload", Icon: "refresh", HxGet: "/worker?rid=" + worker.RID.String()},
+						[]components.ButtonConfig{
+							{ID: "table_button_stop", Color: components.BUTTON_RED, Icon: "close", Name: "Stop", HxPost: "/worker/stopWorkers?rid=" + worker.RID.String()},
+							{ID: "table_button_stop_gracefully", Color: components.BUTTON_YELLOW, Icon: "schedule", Name: "Stop Gracefully", HxPost: "/worker/stopWorkersGracefully?rid=" + worker.RID.String()},
+						},
+					),
+				)
+				<!-- Details Grid -->
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Worker RID</span>
+						<span class="font-mono text-gray-800 break-all">{ worker.RID.String() }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Name</span>
+						<span class="font-semibold text-gray-800">{ worker.Name }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Status</span>
+						<span class={ components.GetStatusClass(worker.Status) }>{ worker.Status }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Created At</span>
+						<span class="text-gray-800">{ worker.CreatedAt.Format("2006-01-02 15:04") }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Updated At</span>
+						<span class="text-gray-800">{ worker.UpdatedAt.Format("2006-01-02 15:04") }</span>
+					</div>
+				</div>
+			</div>
+		}
+	}
+}
+
+templ Workers(workers []*qm.Worker, search string) {
+	@layout.Index("Workers") {
+		@layout.MenuSide("Workers")
+		@layout.InnerBody() {
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@WorkersTable(workers, search)
+			</div>
+		}
+	}
+}
+
+templ WorkersTable(workers []*qm.Worker, search string) {
+	@components.TableFull(
+		&components.TableFullConfig{
+			ID:            "workers_table",
+			Name:          "Worker Queue",
+			Trigger:       "getWorkers",
+			TriggerTarget: "workers_table",
+			Selectable:    true,
+			Topbar: components.Topbar(
+				"Workers",
+				components.InputSearch(
+					"worker_search",
+					search,
+					"Search workers...",
+					"/workers",
+				),
+				components.MenuEdit(
+					components.ButtonConfig{ID: "table_button_reload", Color: components.BUTTON_PRIMARY, Icon: "refresh", Name: "Reload", HxGet: "/workers"},
+					[]components.ButtonConfig{
+						{ID: "details_button_workers_table", Color: components.BUTTON_PRIMARY, Icon: "article", Name: "Details", HxGet: "/worker", HxVals: "js:{rid: getSelectedValues('full_table_workers_table')}", HScript: components.HscriptOne, Disabled: true},
+					},
+					[]components.ButtonConfig{
+						{ID: "table_button_stop", Color: components.BUTTON_RED, Icon: "close", Name: "Stop", HxGet: "/worker/stopWorkers", HxVals: "js:{rid: getSelectedValues('full_table_workers_table')}", HScript: components.HscriptOneOrMore, Disabled: true},
+						{ID: "table_button_stop_gracefully", Color: components.BUTTON_YELLOW, Icon: "schedule", Name: "Stop Gracefully", HxGet: "/worker/stopWorkersGracefully", HxVals: "js:{rid: getSelectedValues('full_table_workers_table')}", HScript: components.HscriptOneOrMore, Disabled: true},
+					},
+				),
+			),
+			Columns: []model.KeyValuePair{
+				{Key: "rid", Value: "Worker ID"},
+				{Key: "name", Value: "Name"},
+				{Key: "status", Value: "Status"},
+				{Key: "created_at", Value: "Created At"},
+				{Key: "updated_at", Value: "Updated At"},
+			},
+			Rows: workersToUniversalMappers(workers),
+		},
+	)
+}

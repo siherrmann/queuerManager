@@ -1,0 +1,175 @@
+package screens
+
+import (
+	"fmt"
+	"time"
+
+	qm "github.com/siherrmann/queuer/model"
+	"manager/model"
+	"manager/view/components"
+	"manager/view/layout"
+)
+
+func jobsToUniversalMappers(jobs []*qm.Job) []model.Mapper {
+	var mappers []model.Mapper
+	for _, job := range jobs {
+		started := "—"
+		if job.StartedAt != nil {
+			started = job.StartedAt.Format("2006-01-02 15:04")
+		}
+		ended := "—"
+		if job.UpdatedAt != (time.Time{}) {
+			ended = job.UpdatedAt.Format("2006-01-02 15:04")
+		}
+		mapper := model.UniversalMapper{
+			Data: []model.UniversalSubMapper{
+				{Key: "rid", Data: job.RID, Link: fmt.Sprintf("/job?rid=%s", job.RID.String())},
+				{Key: "task_name", Data: fmt.Sprint(job.TaskName)},
+				{Key: "status", Data: job.Status, ViewType: "status"},
+				{Key: "started_at", Data: started},
+				{Key: "updated_at", Data: ended},
+			},
+		}
+		mappers = append(mappers, mapper)
+	}
+	return mappers
+}
+
+templ Job(job *qm.Job) {
+	@layout.Index("Job Details") {
+		@layout.MenuSide("Jobs")
+		@layout.InnerBody() {
+			<!-- CARD: Job Information -->
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				switch job.Status {
+					case qm.JobStatusQueued, qm.JobStatusRunning:
+						@components.Topbar(
+							"Job",
+							nil,
+							components.MenuEdit(
+								components.ButtonConfig{ID: "job_button_reload", Color: components.BUTTON_PRIMARY, Name: "Reload", Icon: "refresh", HxPost: "/job?rid=" + job.RID.String()},
+								[]components.ButtonConfig{
+									{ID: "job_button_cancel", Color: components.BUTTON_RED, Icon: "close", Name: "Cancel", HxPost: "/api/job/cancelJobs?rid=" + job.RID.String()},
+								},
+							),
+						)
+					default:
+						@components.Topbar(
+							"Job",
+							nil,
+							components.MenuEdit(
+								components.ButtonConfig{ID: "job_button_reload", Color: components.BUTTON_PRIMARY, Name: "Reload", Icon: "refresh", HxPost: "/job?rid=" + job.RID.String()},
+								[]components.ButtonConfig{
+									{ID: "readd_button_jobs_table", Color: components.BUTTON_PRIMARY, Icon: "replay", Name: "Retry", HxGet: "/jobArchive/readdJob?rid=" + job.RID.String()},
+								},
+							),
+						)
+				}
+				<!-- Details Grid -->
+				<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6">
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Job RID</span>
+						<span class="font-mono text-gray-800 break-all">{ job.RID.String() }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Task Name</span>
+						<span class="font-semibold text-gray-800">{ job.TaskName }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Status</span>
+						<span class={ components.GetStatusClass(job.Status) }>{ job.Status }</span>
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Started At</span>
+						if job.StartedAt != nil {
+							<span class="text-gray-800">{ job.StartedAt.Format("2006-01-02 15:04") }</span>
+						} else {
+							<span class="text-gray-500">—</span>
+						}
+					</div>
+					<div class="text-sm">
+						<span class="font-medium text-gray-500 block">Ended At</span>
+						if job.UpdatedAt != (time.Time{}) {
+							<span class="text-gray-800">{ job.UpdatedAt.Format("2006-01-02 15:04") }</span>
+						} else {
+							<span class="text-gray-500">—</span>
+						}
+					</div>
+					<div class="md:col-span-2 lg:col-span-3 text-sm">
+						<span class="font-medium text-gray-500 block mb-1">Parameters</span>
+						<div class="bg-gray-100 p-3 rounded-lg overflow-x-auto">
+							<code class="font-mono text-xs text-gray-800">{ fmt.Sprint(job.Parameters) }</code>
+						</div>
+					</div>
+					<div class="md:col-span-2 lg:col-span-3 text-sm">
+						<span class="font-medium text-gray-500 block mb-1">Parameters keyed</span>
+						<div class="bg-gray-100 p-3 rounded-lg overflow-x-auto">
+							<code class="font-mono text-xs text-gray-800">{ fmt.Sprint(job.ParametersKeyed) }</code>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- CARD: Job Information -->
+			switch job.Status {
+				case qm.JobStatusSucceeded:
+					<div class="bg-white p-6 rounded-xl shadow-lg mt-8">
+						<h2 class="text-xl font-semibold text-gray-700 mb-4">Job Results</h2>
+						@components.JsonCodeView(job.Results)
+					</div>
+				case qm.JobStatusFailed:
+					<div class="bg-white p-6 rounded-xl shadow-lg mt-8">
+						<h2 class="text-xl font-semibold text-red-600 mb-4">Job Error</h2>
+						@components.JsonCodeView(job.Error)
+					</div>
+			}
+		}
+	}
+}
+
+templ Jobs(jobs []*qm.Job, search string) {
+	@layout.Index("Jobs") {
+		@layout.MenuSide("Current Jobs")
+		@layout.InnerBody() {
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@JobsTable(jobs, search)
+			</div>
+		}
+	}
+}
+
+templ JobsTable(jobs []*qm.Job, search string) {
+	@components.TableFull(
+		&components.TableFullConfig{
+			ID:            "jobs_table",
+			Name:          "Job Queue",
+			Trigger:       "getJobs",
+			TriggerTarget: "jobs_table",
+			Selectable:    true,
+			Topbar: components.Topbar(
+				"Job Queue",
+				components.InputSearch(
+					"job_search",
+					search,
+					"Search jobs...",
+					"/jobs",
+				),
+				components.MenuEdit(
+					components.ButtonConfig{ID: "table_button_reload", Color: components.BUTTON_PRIMARY, Icon: "refresh", Name: "Reload", HxGet: "/jobs"},
+					[]components.ButtonConfig{
+						{ID: "table_button_details_job", Color: components.BUTTON_PRIMARY, Icon: "article", Name: "Details", HxGet: "/job", HxVals: "js:{rid: getSelectedValues('full_table_jobs_table')}", HScript: components.HscriptOne, Disabled: true},
+					},
+					[]components.ButtonConfig{
+						{ID: "table_button_cancel", Color: components.BUTTON_RED, Icon: "close", Name: "Cancel", HxPost: "/api/job/cancelJobs", HxVals: "js:{rid: getSelectedValues('full_table_jobs_table')}", HScript: components.HscriptOneOrMore, Disabled: true},
+					},
+				),
+			),
+			Columns: []model.KeyValuePair{
+				{Key: "rid", Value: "Job ID"},
+				{Key: "task_name", Value: "Name"},
+				{Key: "status", Value: "Status"},
+				{Key: "started_at", Value: "Started At"},
+			},
+			Rows: jobsToUniversalMappers(jobs),
+		},
+	)
+}

@@ -1,0 +1,58 @@
+[
+  {
+    "key": "translation",
+    "name": "Translation",
+    "description": "Translates text from one language to another.",
+    "input_parameters": [
+      {
+        "Key": "source_text",
+        "Type": "string",
+        "Requirement": "min1"
+      },
+      {
+        "Key": "source_language",
+        "Type": "string",
+        "Requirement": "equauto || equen || equde || equfr || eques || equit || equnl || equpt || equru || equzh"
+      },
+      {
+        "Key": "target_language",
+        "Type": "string",
+        "Requirement": "equen || equde || equfr || eques || equit || equnl || equpt || equru || equzh"
+      }
+    ],
+    "input_parameters_keyed": [
+      {
+        "Key": "max_length",
+        "Type": "int",
+        "Requirement": "min1 || max1000"
+      }
+    ],
+    "output_parameters": [
+      {
+        "Key": "output",
+        "Type": "map",
+        "Requirement": "min3",
+        "Groups": null,
+        "Default": "",
+        "InnerValidation": [
+          {
+            "Key": "translated_text",
+            "Type": "string",
+            "Requirement": "-",
+            "Groups": null,
+            "Default": "",
+            "InnerValidation": null
+          },
+          {
+            "Key": "target_language",
+            "Type": "string",
+            "Requirement": "-",
+            "Groups": null,
+            "Default": "",
+            "InnerValidation": null
+          }
+        ]
+      }
+    ]
+  }
+]

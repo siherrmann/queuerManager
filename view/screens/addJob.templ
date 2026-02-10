@@ -1,0 +1,198 @@
+package screens
+
+import (
+	"fmt"
+	vm "github.com/siherrmann/validator/model"
+	"manager/model"
+	"manager/upload"
+	"manager/view/components"
+	"manager/view/layout"
+	"strings"
+)
+
+func getParamNames(task *model.Task) []string {
+	var names []string
+	for _, p := range task.InputParameters {
+		names = append(names, p.Key)
+	}
+	return names
+}
+
+func getKeyedParamNames(task *model.Task) []string {
+	var names []string
+	for _, p := range task.InputParametersKeyed {
+		names = append(names, p.Key)
+	}
+	return names
+}
+
+templ AddJob(availableTasks []*model.Task) {
+	@layout.Index("Add job") {
+		@layout.MenuSide("Add job")
+		@layout.InnerBody() {
+			<div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+				@components.Topbar(
+					"Choose task",
+					nil,
+					components.MenuEdit(
+						components.ButtonConfig{ID: "manage_tasks", Icon: "task", Color: components.BUTTON_PRIMARY, Name: "Manage tasks", HxGet: "/tasks"},
+					),
+				)
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="job-catalog">
+					for _, task := range availableTasks {
+						<div class="border border-gray-200 p-5 rounded-lg hover:bg-gray-50 transition duration-150 flex flex-col">
+							<div class="flex-1">
+								<p class="text-base font-semibold text-gray-800">{ task.Name }</p>
+								<p class="text-sm text-gray-600 mb-3">{ task.Description }</p>
+								if len(task.InputParameters) > 0 {
+									<p class="text-xs font-medium text-gray-600 mb-1">Parameters:</p>
+									<span class="text-xs font-mono text-gray-800 bg-lime-100 px-2 py-1 rounded">
+										{ strings.Join(getParamNames(task), ", ") }
+									</span>
+								}
+								if len(task.InputParametersKeyed) > 0 {
+									<p class="text-xs font-medium text-gray-600 mb-1 mt-2">Keyed Parameters:</p>
+									<span class="text-xs font-mono text-gray-800 bg-lime-200 px-2 py-1 rounded">
+										{ strings.Join(getKeyedParamNames(task), ", ") }
+									</span>
+								}
+							</div>
+							@components.Button(
+								components.ButtonConfig{
+									ID:    "configure_task_" + task.Key,
+									Icon:  "arrow_forward",
+									Name:  "Next",
+									HxGet: fmt.Sprintf("/task/%s", task.Key),
+									Color: components.BUTTON_PRIMARY,
+								},
+							)
+						</div>
+					}
+				</div>
+			</div>
+		}
+	}
+}
+
+// parseEnum extracts allowed values from a requirement like "equen || equde || ..."
+func parseEnum(req string) []string {
+	parts := strings.Split(req, "||")
+	var opts []string
+	for _, p := range parts {
+		s := strings.TrimSpace(p)
+		if strings.HasPrefix(s, "equ") && len(s) > 3 {
+			opts = append(opts, s[3:])
+		}
+	}
+	return opts
+}
+
+templ AddJobConfig(task *model.Task, files []upload.File) {
+	@layout.Index("Add job") {
+		@layout.MenuSide("Add job")
+		@layout.InnerBody() {
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@components.Topbar(fmt.Sprintf("Configure: %s", task.Name), nil, nil)
+				@components.Form(
+					components.FormConf{
+						HxPost: fmt.Sprintf("/api/job/addJob/%s", task.Key),
+						Class:  "space-y-6",
+					},
+				) {
+					if len(task.InputParameters) > 0 {
+						<div class="mb-4">
+							<h3 class="text-lg font-semibold text-gray-800 mb-3">Parameters</h3>
+							for _, v := range task.InputParameters {
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700 mb-1">{ v.Key }</label>
+									switch v.Type {
+										case vm.String:
+											// If requirement hints an enum, render a select
+											if len(parseEnum(v.Requirement)) > 0 {
+												<select name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg">
+													for _, opt := range parseEnum(v.Requirement) {
+														<option value={ opt }>{ opt }</option>
+													}
+												</select>
+											} else if strings.Contains(strings.ToLower(v.Key), "file") || strings.HasSuffix(strings.ToLower(v.Key), "path") {
+												// Heuristic: offer file selector for file/path keys
+												<select name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg">
+													for _, f := range files {
+														<option value={ f.Name }>{ f.Name }</option>
+													}
+												</select>
+											} else {
+												<input type="text" name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg" placeholder={ v.Requirement }/>
+											}
+										case vm.Int:
+											<input type="number" step="1" name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg" placeholder={ v.Requirement }/>
+										case vm.Float:
+											<input type="number" step="any" name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg" placeholder={ v.Requirement }/>
+										default:
+											<input type="text" name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg" placeholder={ v.Requirement }/>
+									}
+								</div>
+							}
+						</div>
+					}
+					if len(task.InputParametersKeyed) > 0 {
+						<div class="mb-4">
+							<h3 class="text-lg font-semibold text-gray-800 mb-3">Keyed Parameters</h3>
+							for _, v := range task.InputParametersKeyed {
+								<div class="mb-4">
+									<label class="block text-sm font-medium text-gray-700 mb-1">{ v.Key }</label>
+									switch v.Type {
+										case vm.String:
+											// If requirement hints an enum, render a select
+											if len(parseEnum(v.Requirement)) > 0 {
+												<select name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg">
+													for _, opt := range parseEnum(v.Requirement) {
+														<option value={ opt }>{ opt }</option>
+													}
+												</select>
+											} else if strings.Contains(strings.ToLower(v.Key), "file") || strings.HasSuffix(strings.ToLower(v.Key), "path") {
+												// Heuristic: offer file selector for file/path keys
+												<select name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg">
+													for _, f := range files {
+														<option value={ f.Name }>{ f.Name }</option>
+													}
+												</select>
+											} else {
+												<input type="text" name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg" placeholder={ v.Requirement }/>
+											}
+										case vm.Int:
+											<input type="number" step="1" name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg" placeholder={ v.Requirement }/>
+										case vm.Float:
+											<input type="number" step="any" name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg" placeholder={ v.Requirement }/>
+										default:
+											<input type="text" name={ v.Key } class="w-full p-2 border border-gray-300 rounded-lg" placeholder={ v.Requirement }/>
+									}
+								</div>
+							}
+						</div>
+					}
+					<div class="flex flex-row pt-2 gap-2 justify-end">
+						@components.Button(
+							components.ButtonConfig{
+								ID:    "cancel_configure_" + task.Key,
+								Icon:  "close",
+								Name:  "Cancel",
+								HxGet: "/",
+								Color: components.BUTTON_YELLOW,
+							},
+						)
+						@components.Button(
+							components.ButtonConfig{
+								ID:    "add_task_" + task.Key,
+								Icon:  "play_arrow",
+								Type:  "submit",
+								Name:  "Add Job",
+								Color: components.BUTTON_PRIMARY,
+							},
+						)
+					</div>
+				}
+			</div>
+		}
+	}
+}

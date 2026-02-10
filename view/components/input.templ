@@ -1,0 +1,236 @@
+package components
+
+templ InputSearch(id string, value string, placeholder string, hxPost string) {
+	<div class="min-w-min">
+		<div class="relative w-auto inline-flex items-stretch rounded-lg p-[0.2rem] background_primary border border_secondary">
+			<input
+				type="search"
+				name="search"
+				id={ id }
+				value={ value }
+				placeholder={ placeholder }
+				class="w-full min-w-[200px] px-3 pr-10 py-2 rounded-lg text-sm/none bodytext background_primary focus:outline-none focus:ring-2 focus:ring-indigo-500"
+				hx-get={ hxPost }
+				hx-trigger="input changed delay:500ms, keyup[key=='Enter']"
+			/>
+			<span class="material-icons absolute right-3 top-1/2 -translate-y-1/2 text-[1rem] text-gray-400 pointer-events-none">search</span>
+		</div>
+	</div>
+}
+
+templ Button(config ButtonConfig) {
+	<div class="min-w-min mt-4">
+		<div class="w-auto inline-flex">
+			@InnerButton(
+				config,
+				false,
+			)
+		</div>
+	</div>
+}
+
+templ InnerButton(entry ButtonConfig, isMenuItem bool) {
+	if len(entry.HxPost) > 0 {
+		@InnerButtonPost(entry, isMenuItem)
+	} else {
+		@InnerButtonGet(entry, isMenuItem)
+	}
+}
+
+templ InnerButtonGet(entry ButtonConfig, isMenuItem bool) {
+	<button
+		if len(entry.ID) > 0 {
+			id={ entry.ID }
+		}
+		if len(entry.Type) > 0 {
+			type={ entry.Type }
+		} else {
+			type="button"
+		}
+		if isMenuItem {
+			role="menuitem"
+		}
+		class={
+			"table_button w-full inline-flex justify-start items-center rounded-lg text-sm/none bodytext",
+			templ.KV("px-4 py-2", len(entry.Icon) == 0),
+			templ.KV("gap-1 px-3 py-2", len(entry.Icon) > 0),
+			templ.KV(entry.Class, len(entry.Class) > 0),
+			buttonColorClass(entry.Color, entry.Hover),
+		}
+		if len(entry.HxGet) > 0 {
+			hx-get={ entry.HxGet }
+		}
+		if len(entry.HxTrigger) > 0 {
+			hx-on:click={ onClickHandler(entry.HxTrigger) }
+		}
+		disabled?={ entry.Disabled }
+		if len(entry.HScript) > 0 {
+			_={ entry.HScript }
+		}
+		if len(entry.HxVals) > 0 {
+			hx-vals={ entry.HxVals }
+		}
+		data-loading-disable
+	>
+		if len(entry.Icon) > 0 {
+			<span class="material-icons text-[1rem]">{ entry.Icon }</span>
+		}
+		{ entry.Name }
+	</button>
+}
+
+templ InnerButtonPost(entry ButtonConfig, isMenuItem bool) {
+	@Form(
+		FormConf{
+			HxPost: entry.HxPost,
+			HxVals: entry.HxVals,
+		},
+	) {
+		<button
+			if len(entry.ID) > 0 {
+				id={ entry.ID }
+			}
+			type="submit"
+			if isMenuItem {
+				role="menuitem"
+			}
+			class={
+				"table_button w-full inline-flex justify-start items-center rounded-lg text-sm/none bodytext",
+				templ.KV("px-4 py-2", len(entry.Icon) == 0),
+				templ.KV("gap-1 px-3 py-2", len(entry.Icon) > 0),
+				templ.KV(entry.Class, len(entry.Class) > 0),
+				buttonColorClass(entry.Color, entry.Hover),
+			}
+			if len(entry.HxTrigger) > 0 {
+				hx-on:click={ onClickHandler(entry.HxTrigger) }
+			}
+			disabled?={ entry.Disabled }
+			if len(entry.HScript) > 0 {
+				_={ entry.HScript }
+			}
+			data-loading-disable
+		>
+			if len(entry.Icon) > 0 {
+				<span class="material-icons text-[1rem]">{ entry.Icon }</span>
+			}
+			{ entry.Name }
+		</button>
+	}
+}
+
+var fileUploadViewHandle = templ.NewOnceHandle()
+
+templ InputFile(id string, name string, label string, accept string, multiple bool) {
+	<div data-file-input-id={ id }>
+		<label class="block text-sm font-medium text-gray-700 mb-2">{ label }</label>
+		<div class="form-group file-area border-dashed-upload border-4 rounded-xl p-8 text-center text-gray-500 bg-gray-50/50 hover:bg-gray-100 transition duration-300 flex flex-col items-center cursor-pointer">
+			<label for={ id } class="material-icons text-4xl cursor-pointer">cloud_upload</label>
+			<input
+				type="file"
+				name={ name }
+				id={ id }
+				if len(accept) > 0 {
+					accept={ accept }
+				}
+				if multiple {
+					multiple="multiple"
+				}
+				required="required"
+			/>
+			<div class="file-dummy p-4">
+				<div class="success">Great, your file(s) are selected. Keep on.</div>
+				<div class="default text-indigo-500 font-semibold">Drop/Select file(s)</div>
+			</div>
+		</div>
+		<!-- Dynamic File List -->
+		<ul id={ "selected_files_list_" + id } class="space-y-2 mt-4">
+			<!-- Files will be dynamically added here by JavaScript -->
+		</ul>
+		@fileUploadViewHandle.Once() {
+			<script type="text/javascript">
+				(function() {
+					var container = document.currentScript.parentElement;
+					var inputId = container.getAttribute('data-file-input-id');
+					var listId = 'selected_files_list_' + inputId;
+					var fileInput = document.getElementById(inputId);
+					var fileList = document.getElementById(listId);
+
+					if (!fileInput || !fileList) return;
+					
+					var selectedFiles = [];
+
+					fileInput.addEventListener('change', function(event) {
+						var newFiles = Array.from(event.target.files);
+						if (fileInput.hasAttribute('multiple')) {
+							selectedFiles = selectedFiles.concat(newFiles);
+						} else {
+							selectedFiles = newFiles;
+						}
+						var dt = new DataTransfer();
+						selectedFiles.forEach(function(f) { dt.items.add(f); });
+						fileInput.files = dt.files;
+						updateFileList();
+					});
+
+					function updateFileList() {
+						fileList.querySelectorAll('.dynamic-file-item').forEach(function(item) { item.remove(); });
+						selectedFiles.forEach(function(file, index) {
+							fileList.appendChild(createFileListItem(file, index));
+						});
+					}
+
+					function createFileListItem(file, index) {
+						var li = document.createElement('li');
+						li.className = 'dynamic-file-item flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200';
+						li.dataset.fileIndex = index;
+						
+						var fileInfo = document.createElement('div');
+						fileInfo.className = 'flex items-center space-x-3';
+						fileInfo.innerHTML = getFileIcon(file.type);
+						
+						var nameSpan = document.createElement('span');
+						nameSpan.className = 'text-gray-800 font-medium';
+						nameSpan.textContent = file.name;
+						fileInfo.appendChild(nameSpan);
+						
+						var sizeSpan = document.createElement('span');
+						sizeSpan.className = 'text-sm text-gray-500';
+						sizeSpan.textContent = '(' + formatFileSize(file.size) + ')';
+						fileInfo.appendChild(sizeSpan);
+						
+						var removeBtn = document.createElement('button');
+						removeBtn.type = 'button';
+						removeBtn.className = 'base_button text-gray-400 hover:text-red-500 transition duration-150';
+						removeBtn.innerHTML = '<span class="material-icons">close</span>';
+						removeBtn.onclick = function() {
+							selectedFiles.splice(index, 1);
+							var dt = new DataTransfer();
+							selectedFiles.forEach(function(f) { dt.items.add(f); });
+							fileInput.files = dt.files;
+							updateFileList();
+						};
+						
+						li.appendChild(fileInfo);
+						li.appendChild(removeBtn);
+						return li;
+					}
+
+					function formatFileSize(bytes) {
+						if (bytes === 0) return '0 B';
+						var k = 1024;
+						var sizes = ['B', 'KB', 'MB', 'GB'];
+						var i = Math.floor(Math.log(bytes) / Math.log(k));
+						return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+					}
+
+					function getFileIcon(mimeType) {
+						if (mimeType.startsWith('image/')) return '<span class="material-icons">image</span>';
+						if (mimeType.startsWith('video/')) return '<span class="material-icons">videocam</span>';
+						if (mimeType.startsWith('audio/')) return '<span class="material-icons">audiotrack</span>';
+						return '<span class="material-icons">description</span>';
+					}
+				})();
+			</script>
+		}
+	</div>
+}

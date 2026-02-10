@@ -1,0 +1,79 @@
+package components
+
+import qm "github.com/siherrmann/queuer/model"
+
+templ CSRF() {
+	<input type="hidden" name="gorilla.csrf.Token" value={ ctx.Value("gorilla.csrf.Token").(string) }/>
+}
+
+type FormConf struct {
+	HxPost     string
+	HxInclude  string
+	HxVals     string
+	HxEncoding string
+	HScript    string
+	Class      string
+}
+
+templ Form(conf FormConf) {
+	<form
+		hx-post={ conf.HxPost }
+		method="POST"
+		hx-swap="none"
+		hx-push-url="false"
+		hx-headers={ `js:{"X-CSRF-Token": document.getElementsByName('gorilla.csrf.Token')[0].value}` }
+		if len(conf.HxInclude) > 0 {
+			hx-include={ conf.HxInclude }
+		}
+		if len(conf.HxVals) > 0 {
+			hx-vals={ conf.HxVals }
+		}
+		if len(conf.HxEncoding) > 0 {
+			hx-encoding={ conf.HxEncoding }
+		}
+		if len(conf.HScript) > 0 {
+			_={ conf.HScript }
+		}
+		class={ conf.Class }
+	>
+		@CSRF()
+		{ children... }
+	</form>
+}
+
+func GetStatusClass(status string) string {
+	switch status {
+	case qm.WorkerStatusReady, qm.JobStatusRunning:
+		return "px-3 py-1 text-xs font-semibold leading-tight text-blue-800 bg-blue-100 rounded-full"
+	case qm.JobStatusSucceeded:
+		return "px-3 py-1 text-xs font-semibold leading-tight text-green-800 bg-green-100 rounded-full"
+	case qm.WorkerStatusStopped, qm.JobStatusFailed:
+		return "px-3 py-1 text-xs font-semibold leading-tight text-red-800 bg-red-100 rounded-full"
+	case qm.JobStatusQueued:
+		return "px-3 py-1 text-xs font-semibold leading-tight text-yellow-800 bg-yellow-100 rounded-full"
+	default:
+		return "px-3 py-1 text-xs font-semibold leading-tight text-gray-800 bg-gray-100 rounded-full"
+	}
+}
+
+templ Status(status string) {
+	<span class={ GetStatusClass(status) }>{ status }</span>
+}
+
+templ Topbar(name string, search templ.Component, menu templ.Component) {
+	<div class="w-full flex flex-wrap items-center gap-2 lg:justify-between mb-4">
+		<div class="min-w-min flex-1">
+			<h1>{ name }</h1>
+		</div>
+		if search != nil {
+			<div class="order-2 lg:order-0">
+				@search
+			</div>
+		}
+		if menu != nil {
+			<div class="order-1 lg:order-0">
+				@menu
+			</div>
+		}
+	</div>
+}

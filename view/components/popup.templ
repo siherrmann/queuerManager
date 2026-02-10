@@ -1,0 +1,84 @@
+package components
+
+import (
+	"fmt"
+	"strings"
+)
+
+func removeSpaces(in string) string {
+	return strings.ReplaceAll(in, " ", "")
+}
+
+templ PopupError(title string, description string) {
+	@Popup(title, 50) {
+		<div role="alert" class="absolute z-20 top-20 left-0 right-0 w-96 max-h-[80vh] m-auto">
+			@PopupHeaderError(title)
+			<div class="px-4 py-3 rounded-b border border-t-0 border-red-500 text-red-700 bg-red-100">
+				<p class="text-red-700">{ description }</p>
+			</div>
+		</div>
+	}
+}
+
+templ PopupInfo(title string, description string) {
+	@Popup(title, 50) {
+		<div role="alert" class="absolute z-20 top-20 left-0 right-0 w-96 max-h-[80vh] m-auto">
+			@PopupHeaderInfo(title)
+			<div class="px-4 py-3 rounded-b border border-t-0 border-indigo-500 text-indigo-700 bg-indigo-100">
+				<p>{ description }</p>
+			</div>
+		</div>
+	}
+}
+
+templ PopupSuccess(title string, description string) {
+	@Popup(title, 50) {
+		<div role="alert" class="absolute z-20 top-20 left-0 right-0 w-96 max-h-[80vh] m-auto">
+			@PopupHeaderSuccess(title)
+			<div class="px-4 py-3 rounded-b border border-t-0 border-green-600 text-green-700 bg-green-100">
+				<p>{ description }</p>
+			</div>
+		</div>
+	}
+}
+
+templ PopupHeaderError(title string) {
+	<div class="px-4 py-3 flex flex-row justify-between text-white font-bold rounded-t bg-red-500">
+		{ title }
+		<button type="button" _={ "on click trigger close" + removeSpaces(title) } class="s-8 inline-flex justify-center items-center rounded-lg text-sm text-white bg-transparent hover:bg-red-400">
+			<span class="material-icons">close</span>
+			<span class="sr-only">Close popup</span>
+		</button>
+	</div>
+}
+
+templ PopupHeaderInfo(title string) {
+	<div class="px-4 py-3 flex flex-row justify-between text-white font-bold rounded-t bg-indigo-700">
+		{ title }
+		<button type="button" _={ "on click trigger close" + removeSpaces(title) } class="s-8 inline-flex justify-center items-center rounded-lg text-sm text-white bg-transparent hover:bg-indigo-500">
+			<span class="material-icons">close</span>
+			<span class="sr-only">Close popup</span>
+		</button>
+	</div>
+}
+
+templ PopupHeaderSuccess(title string) {
+	<div class="px-4 py-3 flex flex-row justify-between text-white font-bold rounded-t bg-green-600">
+		{ title }
+		<button type="button" _={ "on click trigger close" + removeSpaces(title) } class="s-8 inline-flex justify-center items-center rounded-lg text-sm text-white bg-transparent hover:bg-green-500">
+			<span class="material-icons">close</span>
+			<span class="sr-only">Close popup</span>
+		</button>
+	</div>
+}
+
+templ Popup(key string, zIndex int) {
+	<div
+		id={ key }
+		class={ "z-" + fmt.Sprint(zIndex) }
+		_={ "on close" + removeSpaces(key) + " remove me on keyup[key is 'Escape'] from the body remove me" }
+	>
+		<div _={ "on click trigger close" + removeSpaces(key) } class="absolute inset-0 bg-gray-600/50"></div>
+		{ children... }
+	</div>
+}

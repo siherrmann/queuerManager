@@ -1,0 +1,94 @@
+package components
+
+// Unified button colors for MenuEdit
+type ButtonColor string
+
+const (
+	BUTTON_RED     ButtonColor = "red"
+	BUTTON_GREEN   ButtonColor = "green"
+	BUTTON_YELLOW  ButtonColor = "yellow"
+	BUTTON_PRIMARY ButtonColor = "primary"
+)
+
+// buttonColorClass maps ButtonColor to a CSS class.
+// For primary, we support solid (non-hover) and hover variants via the hover flag.
+func buttonColorClass(color ButtonColor, hover bool) string {
+	switch color {
+	case BUTTON_RED:
+		return "button_red"
+	case BUTTON_GREEN:
+		return "button_green"
+	case BUTTON_YELLOW:
+		return "button_yellow"
+	case BUTTON_PRIMARY:
+		return "button_primary"
+	default:
+		return ""
+	}
+}
+
+type ButtonConfig struct {
+	ID        string
+	Icon      string
+	Name      string
+	Type      string
+	HxGet     string
+	HxPost    string
+	HxVals    string
+	HxTrigger string
+	Class     string
+	Color     ButtonColor
+	Hover     bool
+	HScript   string
+	Disabled  bool
+}
+
+templ MenuEdit(mainButton ButtonConfig, buttonGroups ...[]ButtonConfig) {
+	<div class="min-w-min select-none">
+		<div class="relative">
+			<div class="w-auto inline-flex justify-end items-stretch rounded-lg p-[0.2rem] background_primary border border_secondary">
+				@InnerButton(mainButton, false)
+				if len(buttonGroups) > 0 {
+					<div class="flex divide-x divider_secondary">
+						<div class="w-[0.15rem]"></div>
+						<div class="w-[0.2rem]"></div>
+					</div>
+					<div
+						class="inline-flex justify-center items-center rounded-lg px-2 py-1 bodytext button_hover_primary"
+						_={ "on click or keyup[key is 'Enter'] toggle between .hidden and .absolute on #menu_" + mainButton.ID }
+						tabindex="0"
+					>
+						<span class="sr-only">Menu</span>
+						<span class="material-icons">more_vert</span>
+					</div>
+				}
+			</div>
+			if len(buttonGroups) > 0 {
+				<div
+					id={ "menu_" + mainButton.ID }
+					class="end-0 z-10 mt-2 w-56 divide-y divider_secondary rounded-lg background_primary border border_secondary shadow-lg hidden"
+					role="menu"
+					_="on keyup[key is 'Escape'] from the body add .hidden"
+				>
+					for _, buttonGroup := range buttonGroups {
+						<div class="grid gap-1 p-2">
+							for _, button := range buttonGroup {
+								@InnerButton(button, true)
+							}
+						</div>
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+script onClickHandler(hxTrigger string) {
+	console.log(hxTrigger)
+	var reloadingDivs = document.querySelectorAll('div[id^='+hxTrigger+']');
+	console.log(reloadingDivs)
+	for (const reloadingDiv of reloadingDivs) {
+		console.log(reloadingDiv.id)
+		htmx.trigger('div[id='+reloadingDiv.id+']', hxTrigger)
+	}
+}

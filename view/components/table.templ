@@ -1,0 +1,135 @@
+package components
+
+import "manager/model"
+
+const HscriptOne string = `on selectionChanged
+							if length of (<input[id^='select_row_']:checked/> in closest <div[id^='full_table_']/>) === 1
+								remove @disabled from me
+							else
+								add @disabled to me
+						end`
+const HscriptOneOrMore string = `on selectionChanged
+							if length of (<input[id^='select_row_']:checked/> in closest <div[id^='full_table_']/>) > 0
+								remove @disabled from me
+							else
+								add @disabled to me
+						end`
+
+type TableFullConfig struct {
+	ID            string
+	Name          string
+	Trigger       string
+	TriggerTarget string
+	Selectable    bool
+	// Topbar
+	Topbar templ.Component
+	// Table content
+	Columns []model.KeyValuePair
+	Rows    []model.Mapper
+}
+
+templ TableFull(tableConfig *TableFullConfig) {
+	<div
+		id={ "full_table_" + tableConfig.ID }
+		class="w-full flex flex-col min-w-0 wrap-break-word mb-8"
+	>
+		if tableConfig.Topbar != nil {
+			@tableConfig.Topbar
+		}
+		<div class="relative">
+			<div class="overflow-x-auto card background_primary grow">
+				@Table(tableConfig.ID, tableConfig.Columns, tableConfig.Rows, tableConfig.Selectable)
+			</div>
+		</div>
+		<script>
+			function getSelectedValues(id) {
+				return Array.from(htmx.findAll(htmx.find(`#${id}`), "[id^='select_row_']:checked"))
+					.map(row => row.value)
+			}
+
+			function downloadExport(url, rids) {
+				const params = new URLSearchParams();
+				rids.forEach(rid => params.append('rid', rid));
+				window.location.href = `${url}?${params.toString()}`;
+			}
+		</script>
+	</div>
+}
+
+templ Table(id string, columns []model.KeyValuePair, rows []model.Mapper, withSelection bool) {
+	<table class="table-auto min-w-[80vw] lg:min-w-[55vw] divide-y-2 divider_secondary text-sm background_primary">
+		<thead class="text-left">
+			@TableHeader(id, columns, withSelection)
+		</thead>
+		<tbody class="divide-y divider_secondary">
+			for _, row := range rows {
+				@TableRow(columns, row, withSelection)
+			}
+		</tbody>
+	</table>
+}
+
+templ TableHeader(id string, columns []model.KeyValuePair, withSelection bool) {
+	<tr>
+		if (withSelection) {
+			<th class="inset-y-0 start-0 px-4 py-2">
+				<label for={ "select_all_" + id } class="sr-only">Select All</label>
+				<input
+					_="on click
+						set (<input[id^='select_row_']/> in closest <table/>)'s checked to my.checked
+						send selectionChanged to <.table_button/> in closest <div[id^='full_table']/>
+					end
+					on selectionChanged
+						set my.checked to (length of <input[id^='select_row_']:checked/> in closest <table/>) === (length of <input[id^='select_row_']/> in closest <table/>)
+					end"
+					type="checkbox"
+					id={ "select_all_" + id }
+					class="size-5 rounded-lg border-gray-400 text-indigo-700 focus:ring-indigo-700"
+				/>
+			</th>
+		}
+		for _, column := range columns {
+			<th class="whitespace-nowrap max-w-48 truncate px-4 py-2 bodytext_bold">{ column.Value }</th>
+		}
+	</tr>
+}
+
+templ TableRow(columns []model.KeyValuePair, row model.Mapper, withSelection bool) {
+	<tr>
+		if (withSelection) {
+			<td class="inset-y-0 start-0 px-4 py-2">
+				<label for={ "select_row_" + row.ToIdentifier() } class="sr-only">Row { row.ToName() }</label>
+				<input
+					contenteditable="true"
+					_="on click
+						send selectionChanged to <.table_button/> in closest <div[id^='full_table']/>
+						send selectionChanged to previous <input[id^='select_all_']/>
+					end"
+					type="checkbox"
+					id={ "select_row_" + row.ToIdentifier() }
+					value={ row.ToIdentifier() }
+					class="size-5 rounded-lg border-gray-400 text-indigo-700 focus:ring-indigo-700"
+				/>
+			</td>
+		}
+		for i, column := range columns {
+			if i == 0 {
+				if row.ToData()[i].Link != "" {
+					<td class="whitespace-nowrap max-w-48 truncate px-4 py-2">
+						<a href={ row.ToData()[i].Link } class="text-indigo-600 bodytext_bold underline">
+							{ row.ToDataMap().ToDataMapReadable().GetStringByKey(column.Key) }
+						</a>
+					</td>
+				} else {
+					<td class="whitespace-nowrap max-w-48 truncate px-4 py-2 bodytext_bold">{ row.ToDataMap().ToDataMapReadable().GetStringByKey(column.Key) }</td>
+				}
+			} else if row.ToData()[i].ViewType == "status" {
+				<td class="whitespace-nowrap max-w-48 truncate px-4 py-2">
+					@Status(row.ToDataMap().ToDataMapReadable().GetStringByKey(column.Key))
+				</td>
+			} else {
+				<td class="whitespace-nowrap max-w-48 truncate px-4 py-2 bodytext">{ row.ToDataMap().ToDataMapReadable().GetStringByKey(column.Key) }</td>
+			}
+		}
+	</tr>
+}

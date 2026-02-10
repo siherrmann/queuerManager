@@ -1,0 +1,55 @@
+package screens
+
+import (
+	qm "github.com/siherrmann/queuer/model"
+	"manager/model"
+	"manager/view/components"
+	"manager/view/layout"
+)
+
+templ JobArchive(archivedJobs []*qm.Job, search string) {
+	@layout.Index("Job Archive") {
+		@layout.MenuSide("Job Archive")
+		@layout.InnerBody() {
+			<div class="bg-white p-6 rounded-xl shadow-lg">
+				@JobArchiveTable(archivedJobs, search)
+			</div>
+		}
+	}
+}
+
+templ JobArchiveTable(archivedJobs []*qm.Job, search string) {
+	@components.TableFull(
+		&components.TableFullConfig{
+			ID:            "jobs_table",
+			Name:          "Job Queue",
+			Trigger:       "getJobs",
+			TriggerTarget: "jobs_table",
+			Selectable:    true,
+			Topbar: components.Topbar(
+				"Job Archive",
+				components.InputSearch(
+					"job_archive_search",
+					search,
+					"Search jobs...",
+					"/jobArchive",
+				),
+				components.MenuEdit(
+					components.ButtonConfig{ID: "table_button_reload", Color: components.BUTTON_PRIMARY, Icon: "refresh", Name: "Reload", HxGet: "/jobArchive"},
+					[]components.ButtonConfig{
+						{ID: "table_button_details_job", Color: components.BUTTON_PRIMARY, Icon: "article", Name: "Details", HxGet: "/job", HxVals: "js:{rid: getSelectedValues('full_table_jobs_table')}", HScript: components.HscriptOne, Disabled: true},
+						{ID: "table_button_retry_job", Color: components.BUTTON_PRIMARY, Icon: "replay", Name: "Retry", HxGet: "/jobArchive/readdJob", HxVals: "js:{rid: getSelectedValues('full_table_jobs_table')}", HScript: components.HscriptOne, Disabled: true},
+					},
+				),
+			),
+			Columns: []model.KeyValuePair{
+				{Key: "rid", Value: "Job ID"},
+				{Key: "task_name", Value: "Name"},
+				{Key: "status", Value: "Status"},
+				{Key: "started_at", Value: "Started At"},
+				{Key: "updated_at", Value: "Ended At"},
+			},
+			Rows: jobsToUniversalMappers(archivedJobs),
+		},
+	)
+}
