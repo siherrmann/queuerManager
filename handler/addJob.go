@@ -6,10 +6,10 @@ import (
 
 	"github.com/siherrmann/queuerManager/view/screens"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
-func (m *ManagerHandler) AddJobView(c echo.Context) error {
+func (m *ManagerHandler) AddJobView(c *echo.Context) error {
 	tasks, err := m.taskDB.SelectAllTasks(0, 100)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to retrieve tasks")
@@ -22,7 +22,7 @@ func (m *ManagerHandler) AddJobView(c echo.Context) error {
 }
 
 // AddJobConfigView renders a task-specific screen with parameter inputs
-func (m *ManagerHandler) AddJobConfigView(c echo.Context) error {
+func (m *ManagerHandler) AddJobConfigView(c *echo.Context) error {
 	taskKey := c.Param("taskKey")
 	task, err := m.taskDB.SelectTaskByKey(taskKey)
 	if err != nil {

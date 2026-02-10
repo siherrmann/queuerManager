@@ -1,11 +1,13 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/siherrmann/queuerManager/handler"
 	mw "github.com/siherrmann/queuerManager/middleware"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
 // SetupRoutes configures all API routes for the manager service
@@ -13,7 +15,10 @@ func SetupRoutes(e *echo.Echo, h *handler.ManagerHandler) {
 	// Middleware
 	// e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{http.MethodGet, http.MethodPost, http.MethodPut, http.MethodDelete},
+	}))
 
 	// Custom Middleware
 	m := mw.NewMiddleware()

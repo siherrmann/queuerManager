@@ -9,12 +9,12 @@ import (
 	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/siherrmann/queuer/model"
 )
 
 // GetWorker retrieves a specific worker by RID
-func (m *ManagerHandler) GetWorker(c echo.Context) error {
+func (m *ManagerHandler) GetWorker(c *echo.Context) error {
 	ridStr := c.Param("rid")
 	rid, err := uuid.Parse(ridStr)
 	if err != nil {
@@ -30,7 +30,7 @@ func (m *ManagerHandler) GetWorker(c echo.Context) error {
 }
 
 // GetWorkers retrieves a paginated list of workers
-func (m *ManagerHandler) GetWorkers(c echo.Context) error {
+func (m *ManagerHandler) GetWorkers(c *echo.Context) error {
 	lastIdStr := c.QueryParam("lastId")
 	limitStr := c.QueryParam("limit")
 
@@ -65,7 +65,7 @@ func (m *ManagerHandler) GetWorkers(c echo.Context) error {
 // =======View Handlers=======
 
 // WorkerView renders the worker detail page
-func (m *ManagerHandler) WorkerView(c echo.Context) error {
+func (m *ManagerHandler) WorkerView(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if len(ridStrings) == 0 || !ok {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Missing worker RID")
@@ -88,7 +88,7 @@ func (m *ManagerHandler) WorkerView(c echo.Context) error {
 }
 
 // WorkersView renders the workers list page
-func (m *ManagerHandler) WorkersView(c echo.Context) error {
+func (m *ManagerHandler) WorkersView(c *echo.Context) error {
 	lastIdStr := c.QueryParam("lastId")
 	limitStr := c.QueryParam("limit")
 	search := c.QueryParam("search")
@@ -134,7 +134,7 @@ func (m *ManagerHandler) WorkersView(c echo.Context) error {
 }
 
 // StopWorkersView handles stopping workers
-func (m *ManagerHandler) StopWorkersView(c echo.Context) error {
+func (m *ManagerHandler) StopWorkersView(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if !ok || len(ridStrings) == 0 {
 		return renderPopupOrJson(c, http.StatusBadRequest, "No worker RIDs provided")
@@ -161,7 +161,7 @@ func (m *ManagerHandler) StopWorkersView(c echo.Context) error {
 }
 
 // StopWorkersGracefullyView handles gracefully stopping workers
-func (m *ManagerHandler) StopWorkersGracefullyView(c echo.Context) error {
+func (m *ManagerHandler) StopWorkersGracefullyView(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if !ok || len(ridStrings) == 0 {
 		return renderPopupOrJson(c, http.StatusBadRequest, "No worker RIDs provided")

@@ -8,10 +8,10 @@ import (
 	"github.com/siherrmann/queuerManager/view/components"
 
 	"github.com/a-h/templ"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
-func render(ctx echo.Context, t templ.Component, status ...int) error {
+func render(ctx *echo.Context, t templ.Component, status ...int) error {
 	buf := templ.GetBuffer()
 	defer templ.ReleaseBuffer(buf)
 
@@ -25,7 +25,7 @@ func render(ctx echo.Context, t templ.Component, status ...int) error {
 	return ctx.HTML(http.StatusOK, buf.String())
 }
 
-func renderPopup(c echo.Context, component templ.Component) error {
+func renderPopup(c *echo.Context, component templ.Component) error {
 	c.Response().Header().Add("HX-Retarget", "#body")
 	c.Response().Header().Add("HX-Reswap", "beforeend")
 	return render(c, component)
@@ -50,7 +50,7 @@ func renderPopupHTTP(writer http.ResponseWriter, component templ.Component) erro
 	return renderHTTP(writer, component)
 }
 
-func renderPopupOrJson(c echo.Context, status int, value ...any) error {
+func renderPopupOrJson(c *echo.Context, status int, value ...any) error {
 	// No value to render
 	if len(value) == 0 {
 		return c.NoContent(status)

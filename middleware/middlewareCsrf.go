@@ -6,7 +6,7 @@ import (
 	"github.com/siherrmann/queuerManager/handler"
 
 	"github.com/gorilla/csrf"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func (r Middleware) CsrfMiddleware() echo.MiddlewareFunc {

@@ -11,14 +11,14 @@ import (
 	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	vm "github.com/siherrmann/validator/model"
 )
 
 // =======API Handlers=======
 
 // AddTask handles the addition of a new task
-func (m *ManagerHandler) AddTask(c echo.Context) error {
+func (m *ManagerHandler) AddTask(c *echo.Context) error {
 	var requestData struct {
 		Key              string `json:"key" form:"key"`
 		Name             string `json:"name" form:"name"`
@@ -84,7 +84,7 @@ func (m *ManagerHandler) AddTask(c echo.Context) error {
 }
 
 // UpdateTask handles updating an existing task
-func (m *ManagerHandler) UpdateTask(c echo.Context) error {
+func (m *ManagerHandler) UpdateTask(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if len(ridStrings) == 0 || !ok {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Missing task RID")
@@ -161,7 +161,7 @@ func (m *ManagerHandler) UpdateTask(c echo.Context) error {
 }
 
 // DeleteTasks deletes multiple tasks by RIDs
-func (m *ManagerHandler) DeleteTasks(c echo.Context) error {
+func (m *ManagerHandler) DeleteTasks(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if len(ridStrings) == 0 || !ok {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Missing task RID")
@@ -196,7 +196,7 @@ func (m *ManagerHandler) DeleteTasks(c echo.Context) error {
 }
 
 // GetTask retrieves a specific task by RID
-func (m *ManagerHandler) GetTask(c echo.Context) error {
+func (m *ManagerHandler) GetTask(c *echo.Context) error {
 	ridStr := c.Param("rid")
 	rid, err := uuid.Parse(ridStr)
 	if err != nil {
@@ -212,7 +212,7 @@ func (m *ManagerHandler) GetTask(c echo.Context) error {
 }
 
 // GetTaskByName retrieves a specific task by name
-func (m *ManagerHandler) GetTaskByName(c echo.Context) error {
+func (m *ManagerHandler) GetTaskByName(c *echo.Context) error {
 	name := c.Param("name")
 	if name == "" {
 		return c.String(http.StatusBadRequest, "Task name is required")
@@ -227,7 +227,7 @@ func (m *ManagerHandler) GetTaskByName(c echo.Context) error {
 }
 
 // GetTasks retrieves a paginated list of tasks
-func (m *ManagerHandler) GetTasks(c echo.Context) error {
+func (m *ManagerHandler) GetTasks(c *echo.Context) error {
 	lastIdStr := c.QueryParam("lastId")
 	limitStr := c.QueryParam("limit")
 
@@ -262,7 +262,7 @@ func (m *ManagerHandler) GetTasks(c echo.Context) error {
 // =======View Handlers=======
 
 // TaskView renders the task detail view
-func (m *ManagerHandler) TaskView(c echo.Context) error {
+func (m *ManagerHandler) TaskView(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if len(ridStrings) == 0 || !ok {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Missing task RID")
@@ -285,7 +285,7 @@ func (m *ManagerHandler) TaskView(c echo.Context) error {
 }
 
 // TasksView renders the tasks list view
-func (m *ManagerHandler) TasksView(c echo.Context) error {
+func (m *ManagerHandler) TasksView(c *echo.Context) error {
 	lastIdStr := c.QueryParam("lastId")
 	limitStr := c.QueryParam("limit")
 	search := c.QueryParam("search")
@@ -334,12 +334,12 @@ func (m *ManagerHandler) TasksView(c echo.Context) error {
 // =======Popup Handlers=======
 
 // AddTaskPopupView renders the add task popup
-func (m *ManagerHandler) AddTaskPopupView(c echo.Context) error {
+func (m *ManagerHandler) AddTaskPopupView(c *echo.Context) error {
 	return renderPopup(c, screens.AddTaskPopup())
 }
 
 // UpdateTaskPopupView renders the update task popup
-func (m *ManagerHandler) UpdateTaskPopupView(c echo.Context) error {
+func (m *ManagerHandler) UpdateTaskPopupView(c *echo.Context) error {
 	ridStr := c.QueryParam("rid")
 	rid, err := uuid.Parse(ridStr)
 	if err != nil {
@@ -355,7 +355,7 @@ func (m *ManagerHandler) UpdateTaskPopupView(c echo.Context) error {
 }
 
 // DeleteTaskPopupView renders the delete task confirmation popup
-func (m *ManagerHandler) DeleteTaskPopupView(c echo.Context) error {
+func (m *ManagerHandler) DeleteTaskPopupView(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if len(ridStrings) == 0 || !ok {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Missing task RIDs")
@@ -367,12 +367,12 @@ func (m *ManagerHandler) DeleteTaskPopupView(c echo.Context) error {
 }
 
 // ImportTaskPopupView renders the import task popup
-func (m *ManagerHandler) ImportTaskPopupView(c echo.Context) error {
+func (m *ManagerHandler) ImportTaskPopupView(c *echo.Context) error {
 	return renderPopup(c, screens.ImportTaskPopup())
 }
 
 // ExportTask exports selected tasks as JSON array file
-func (m *ManagerHandler) ExportTask(c echo.Context) error {
+func (m *ManagerHandler) ExportTask(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if len(ridStrings) == 0 || !ok {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Missing task RIDs"})
@@ -422,7 +422,7 @@ func (m *ManagerHandler) ExportTask(c echo.Context) error {
 }
 
 // ImportTask imports tasks from JSON array file
-func (m *ManagerHandler) ImportTask(c echo.Context) error {
+func (m *ManagerHandler) ImportTask(c *echo.Context) error {
 	file, err := c.FormFile("task_file")
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusBadRequest, "No file uploaded")

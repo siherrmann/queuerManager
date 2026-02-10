@@ -6,7 +6,7 @@ import (
 	"github.com/siherrmann/queuerManager/database"
 	"github.com/siherrmann/queuerManager/upload"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/siherrmann/validator"
 )
 
@@ -25,7 +25,7 @@ func NewManagerHandler(filesystem upload.Filesystem, taskDB *database.TaskDBHand
 }
 
 // Health check handler
-func (m *ManagerHandler) HealthCheck(c echo.Context) error {
+func (m *ManagerHandler) HealthCheck(c *echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{
 		"status":  "healthy",
 		"service": "queuer-manager",

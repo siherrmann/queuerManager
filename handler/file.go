@@ -9,10 +9,10 @@ import (
 	"github.com/siherrmann/queuerManager/upload"
 	"github.com/siherrmann/queuerManager/view/screens"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
-func (m *ManagerHandler) UploadFiles(c echo.Context) error {
+func (m *ManagerHandler) UploadFiles(c *echo.Context) error {
 	// Parse multipart form with 32MB max memory
 	err := c.Request().ParseMultipartForm(32 << 20)
 	if err != nil {
@@ -50,7 +50,7 @@ func (m *ManagerHandler) UploadFiles(c echo.Context) error {
 	return renderPopupOrJson(c, http.StatusOK, fmt.Sprintf("%v file(s) uploaded successfully", len(uploadedFiles)))
 }
 
-func (m *ManagerHandler) DeleteFile(c echo.Context) error {
+func (m *ManagerHandler) DeleteFile(c *echo.Context) error {
 	filename := c.Param("filename")
 	err := m.filesystem.Delete(filename)
 	if err != nil {
@@ -63,7 +63,7 @@ func (m *ManagerHandler) DeleteFile(c echo.Context) error {
 }
 
 // DeleteFiles deletes multiple files
-func (m *ManagerHandler) DeleteFiles(c echo.Context) error {
+func (m *ManagerHandler) DeleteFiles(c *echo.Context) error {
 	names := c.QueryParams()["name"]
 	if len(names) == 0 {
 		return renderPopupOrJson(c, http.StatusBadRequest, "No file names provided")
@@ -91,7 +91,7 @@ func (m *ManagerHandler) DeleteFiles(c echo.Context) error {
 }
 
 // FileView renders the file detail view
-func (m *ManagerHandler) FileView(c echo.Context) error {
+func (m *ManagerHandler) FileView(c *echo.Context) error {
 	filename := c.QueryParam("name")
 	if filename == "" {
 		return renderPopupOrJson(c, http.StatusBadRequest, "File name is required")
@@ -121,7 +121,7 @@ func (m *ManagerHandler) FileView(c echo.Context) error {
 }
 
 // FilesView renders the files list view
-func (m *ManagerHandler) FilesView(c echo.Context) error {
+func (m *ManagerHandler) FilesView(c *echo.Context) error {
 	search := c.QueryParam("search")
 
 	files, err := m.filesystem.ListFiles()
@@ -148,12 +148,12 @@ func (m *ManagerHandler) FilesView(c echo.Context) error {
 }
 
 // AddFilePopupView renders the add file popup
-func (m *ManagerHandler) AddFilePopupView(c echo.Context) error {
+func (m *ManagerHandler) AddFilePopupView(c *echo.Context) error {
 	return renderPopup(c, screens.AddFilePopup())
 }
 
 // DeleteFilePopupView renders the delete file popup
-func (m *ManagerHandler) DeleteFilePopupView(c echo.Context) error {
+func (m *ManagerHandler) DeleteFilePopupView(c *echo.Context) error {
 	names := c.QueryParams()["name"]
 	if len(names) == 0 {
 		return renderPopupOrJson(c, http.StatusBadRequest, "No file names provided")

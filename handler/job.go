@@ -10,14 +10,14 @@ import (
 	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/siherrmann/queuer/model"
 )
 
 // =======API Handlers=======
 
 // AddJob handles the addition of a new job
-func (m *ManagerHandler) AddJob(c echo.Context) error {
+func (m *ManagerHandler) AddJob(c *echo.Context) error {
 	taskKey := c.Param("taskKey")
 	task, err := m.taskDB.SelectTaskByKey(taskKey)
 	if err != nil {
@@ -60,7 +60,7 @@ func (m *ManagerHandler) AddJob(c echo.Context) error {
 }
 
 // GetJobs retrieves a paginated list of jobs
-func (m *ManagerHandler) GetJobs(c echo.Context) error {
+func (m *ManagerHandler) GetJobs(c *echo.Context) error {
 	lastIdStr := c.QueryParam("lastId")
 	limitStr := c.QueryParam("limit")
 
@@ -93,7 +93,7 @@ func (m *ManagerHandler) GetJobs(c echo.Context) error {
 }
 
 // CancelJob cancels a specific job by RID
-func (m *ManagerHandler) CancelJob(c echo.Context) error {
+func (m *ManagerHandler) CancelJob(c *echo.Context) error {
 	ridStr := c.Param("rid")
 	rid, err := uuid.Parse(ridStr)
 	if err != nil {
@@ -109,8 +109,8 @@ func (m *ManagerHandler) CancelJob(c echo.Context) error {
 }
 
 // CancelJobs cancels multiple jobs by their RIDs
-func (m *ManagerHandler) CancelJobs(c echo.Context) error {
-	form, err := c.FormParams()
+func (m *ManagerHandler) CancelJobs(c *echo.Context) error {
+	form, err := c.FormValues()
 	if _, ok := form["rid"]; !ok || err != nil {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Failed to parse form with job RIDs")
 	}
@@ -141,7 +141,7 @@ func (m *ManagerHandler) CancelJobs(c echo.Context) error {
 }
 
 // DeleteJob deletes a specific job by RID
-func (m *ManagerHandler) DeleteJob(c echo.Context) error {
+func (m *ManagerHandler) DeleteJob(c *echo.Context) error {
 	ridStr := c.Param("rid")
 	rid, err := uuid.Parse(ridStr)
 	if err != nil {
@@ -159,7 +159,7 @@ func (m *ManagerHandler) DeleteJob(c echo.Context) error {
 // =======View Handlers=======
 
 // JobView renders the job detail view
-func (m *ManagerHandler) JobView(c echo.Context) error {
+func (m *ManagerHandler) JobView(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if len(ridStrings) == 0 || !ok {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Missing job RID")
@@ -190,7 +190,7 @@ func (m *ManagerHandler) JobView(c echo.Context) error {
 }
 
 // JobsView renders the jobs view
-func (m *ManagerHandler) JobsView(c echo.Context) error {
+func (m *ManagerHandler) JobsView(c *echo.Context) error {
 	lastIdStr := c.QueryParam("lastId")
 	limitStr := c.QueryParam("limit")
 	search := c.QueryParam("search")

@@ -15,7 +15,7 @@ import (
 	"github.com/siherrmann/queuerManager/model"
 	"github.com/siherrmann/queuerManager/upload"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	qh "github.com/siherrmann/queuer/helper"
 	qmodel "github.com/siherrmann/queuer/model"
 )
@@ -39,7 +39,10 @@ func ManagerServer(port string, maxConcurrency int) {
 	e := echo.New()
 	SetupRoutes(e, mh)
 
-	e.Logger.Fatal(e.Start(":" + port))
+	err = e.Start(":" + port)
+	if err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 
 	<-ctx.Done()
 	slog.Info("Shutting down manager server")
@@ -103,6 +106,7 @@ func InitManagerHandler(ctx context.Context, cancel context.CancelFunc, maxConcu
 }
 
 func loadTasksFromJSON(filePath string, taskDB database.TaskDBHandlerFunctions, logger *slog.Logger) error {
+	// #nosec G304 -- Accepting file path from env variable is intentional and controlled.
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return err

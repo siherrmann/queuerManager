@@ -9,12 +9,12 @@ import (
 	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/siherrmann/queuer/model"
 )
 
 // GetJobArchive retrieves a specific archived job by RID
-func (m *ManagerHandler) GetJobArchive(c echo.Context) error {
+func (m *ManagerHandler) GetJobArchive(c *echo.Context) error {
 	ridStr := c.Param("rid")
 	rid, err := uuid.Parse(ridStr)
 	if err != nil {
@@ -30,7 +30,7 @@ func (m *ManagerHandler) GetJobArchive(c echo.Context) error {
 }
 
 // GetJobsArchive retrieves a paginated list of archived jobs
-func (m *ManagerHandler) GetJobsArchive(c echo.Context) error {
+func (m *ManagerHandler) GetJobsArchive(c *echo.Context) error {
 	lastIdStr := c.QueryParam("lastId")
 	limitStr := c.QueryParam("limit")
 
@@ -65,7 +65,7 @@ func (m *ManagerHandler) GetJobsArchive(c echo.Context) error {
 // ======View Handlers======
 
 // JobArchiveView renders the job archive view
-func (m *ManagerHandler) JobArchiveView(c echo.Context) error {
+func (m *ManagerHandler) JobArchiveView(c *echo.Context) error {
 	lastIdStr := c.QueryParam("lastId")
 	limitStr := c.QueryParam("limit")
 	search := c.QueryParam("search")
@@ -111,7 +111,7 @@ func (m *ManagerHandler) JobArchiveView(c echo.Context) error {
 }
 
 // ReaddJobFromArchiveView readds a job from the archive back to the queue
-func (m *ManagerHandler) ReaddJobFromArchiveView(c echo.Context) error {
+func (m *ManagerHandler) ReaddJobFromArchiveView(c *echo.Context) error {
 	ridStrings, ok := c.QueryParams()["rid"]
 	if !ok || len(ridStrings) == 0 {
 		return renderPopupOrJson(c, http.StatusBadRequest, "No job RID provided")

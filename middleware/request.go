@@ -3,11 +3,11 @@ package middleware
 import (
 	"github.com/siherrmann/queuerManager/model"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func (r *Middleware) RequestContextMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		rc := model.GetRequestContext(c)
 
 		rc.Url = c.Request().URL.Path

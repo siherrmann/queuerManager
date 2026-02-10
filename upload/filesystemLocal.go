@@ -24,10 +24,11 @@ func NewFilesystemLocal(basePath string) Filesystem {
 func (fs *FilesystemLocal) Write(path string, reader io.Reader, size int64) error {
 	fullPath := filepath.Join(fs.basePath, path)
 	dir := filepath.Dir(fullPath)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0750); err != nil {
 		return err
 	}
 
+	// #nosec G304 -- Accepting file path from env variable is intentional and controlled.
 	file, err := os.Create(fullPath)
 	if err != nil {
 		return err
@@ -41,12 +42,14 @@ func (fs *FilesystemLocal) Write(path string, reader io.Reader, size int64) erro
 // Open opens a file at the specified path and returns a ReadCloser
 func (fs *FilesystemLocal) Open(path string) (io.ReadCloser, error) {
 	fullPath := filepath.Join(fs.basePath, path)
+	// #nosec G304 -- Accepting file path from variable is intentional and controlled.
 	return os.Open(fullPath)
 }
 
 // Delete removes the file at the specified path
 func (fs *FilesystemLocal) Delete(path string) error {
 	fullPath := filepath.Join(fs.basePath, path)
+	// #nosec G304 -- Accepting file path from variable is intentional and controlled.
 	return os.Remove(fullPath)
 }
 
