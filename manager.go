@@ -9,6 +9,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/siherrmann/queuer"
 	"github.com/siherrmann/queuerManager/database"
 	"github.com/siherrmann/queuerManager/handler"
 	"github.com/siherrmann/queuerManager/helper"
@@ -25,7 +26,9 @@ func ManagerServer(port string, maxConcurrency int) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	mh, err := InitManagerHandler(ctx, cancel, maxConcurrency)
+	queuerInstance := queuer.NewQueuer("manager-server", maxConcurrency)
+
+	mh, err := InitManagerHandler(ctx, cancel, queuerInstance)
 	if err != nil {
 		log.Fatalf("Failed to initialize manager handler: %v", err)
 	}
@@ -44,10 +47,7 @@ func ManagerServer(port string, maxConcurrency int) {
 
 // InitManagerHandler creates and configures the manager handler, including initializing the queuer, setting up the filesystem, and loading tasks from a JSON file if specified.
 // It returns the initialized manager handler or an error if initialization fails.
-func InitManagerHandler(ctx context.Context, cancel context.CancelFunc, maxConcurrency int) (*handler.ManagerHandler, error) {
-	// Create queuer instance
-	helper.InitQueuer(maxConcurrency)
-
+func InitManagerHandler(ctx context.Context, cancel context.CancelFunc, queuerInstance *queuer.Queuer) (*handler.ManagerHandler, error) {
 	// Create filesystem from environment variables
 	filesystem, err := upload.CreateFilesystemFromEnv()
 	if err != nil {
@@ -66,7 +66,7 @@ func InitManagerHandler(ctx context.Context, cancel context.CancelFunc, maxConcu
 	db := &qh.Database{
 		Name:     "task",
 		Logger:   logger,
-		Instance: helper.Queuer.DB,
+		Instance: queuerInstance.DB,
 	}
 	taskDB, err := database.NewTaskDBHandler(db, false)
 	if err != nil {
@@ -83,7 +83,7 @@ func InitManagerHandler(ctx context.Context, cancel context.CancelFunc, maxConcu
 	}
 
 	// Create and configure manager handler
-	mh := handler.NewManagerHandler(filesystem, taskDB)
+	mh := handler.NewManagerHandler(filesystem, taskDB, queuerInstance)
 
 	// Start the queuer with master settings
 	masterSettings := &qmodel.MasterSettings{
@@ -94,7 +94,7 @@ func InitManagerHandler(ctx context.Context, cancel context.CancelFunc, maxConcu
 		JobStaleThreshold:     time.Minute * 10,
 		JobDeleteThreshold:    time.Minute * 100,
 	}
-	helper.Queuer.Start(ctx, cancel, masterSettings)
+	mh.Queuer.Start(ctx, cancel, masterSettings)
 
 	return mh, nil
 }

@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/siherrmann/queuerManager/helper"
 	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
@@ -48,7 +47,7 @@ func (m *ManagerHandler) AddJob(c *echo.Context) error {
 	}
 
 	// Add job with keyed parameters map and spread parameter list
-	jobAdded, err := helper.Queuer.AddJob(taskKey, parametersKeyed, parametersList...)
+	jobAdded, err := m.Queuer.AddJob(taskKey, parametersKeyed, parametersList...)
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to add job: %v", err))
 	}
@@ -84,7 +83,7 @@ func (m *ManagerHandler) GetJobs(c *echo.Context) error {
 		limit = parsedLimit
 	}
 
-	jobs, err := helper.Queuer.GetJobs(lastId, limit)
+	jobs, err := m.Queuer.GetJobs(lastId, limit)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to retrieve jobs")
 	}
@@ -100,7 +99,7 @@ func (m *ManagerHandler) CancelJob(c *echo.Context) error {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Invalid job RID format")
 	}
 
-	cancelledJob, err := helper.Queuer.CancelJob(rid)
+	cancelledJob, err := m.Queuer.CancelJob(rid)
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, "Failed to cancel job")
 	}
@@ -130,7 +129,7 @@ func (m *ManagerHandler) CancelJobs(c *echo.Context) error {
 
 	var cancelledJobs []*model.Job
 	for _, rid := range rids {
-		cancelledJob, err := helper.Queuer.CancelJob(rid)
+		cancelledJob, err := m.Queuer.CancelJob(rid)
 		if err != nil {
 			return renderPopupOrJson(c, http.StatusInternalServerError, "Failed to cancel jobs")
 		}
@@ -148,7 +147,7 @@ func (m *ManagerHandler) DeleteJob(c *echo.Context) error {
 		return renderPopupOrJson(c, http.StatusBadRequest, fmt.Sprintf("Invalid rid: %v", err))
 	}
 
-	err = helper.Queuer.DeleteJob(rid)
+	err = m.Queuer.DeleteJob(rid)
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to delete job: %v", err))
 	}
@@ -170,9 +169,9 @@ func (m *ManagerHandler) JobView(c *echo.Context) error {
 		return c.String(http.StatusBadRequest, "Invalid job RID format")
 	}
 
-	job, err := helper.Queuer.GetJob(rid)
+	job, err := m.Queuer.GetJob(rid)
 	if err != nil {
-		job, err = helper.Queuer.GetJobEnded(rid)
+		job, err = m.Queuer.GetJobEnded(rid)
 		if err != nil {
 			return renderPopupOrJson(c, http.StatusNotFound, "Job not found")
 		}
@@ -219,13 +218,13 @@ func (m *ManagerHandler) JobsView(c *echo.Context) error {
 	var err error
 	if search != "" {
 		log.Printf("searching for: %v", search)
-		jobs, err = helper.Queuer.GetJobsBySearch(search, lastId, limit)
+		jobs, err = m.Queuer.GetJobsBySearch(search, lastId, limit)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Failed to search jobs")
 		}
 		log.Printf("found jobs: %v", jobs)
 	} else {
-		jobs, err = helper.Queuer.GetJobs(lastId, limit)
+		jobs, err = m.Queuer.GetJobs(lastId, limit)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Failed to retrieve jobs")
 		}

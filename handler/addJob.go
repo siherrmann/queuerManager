@@ -29,7 +29,7 @@ func (m *ManagerHandler) AddJobConfigView(c *echo.Context) error {
 		return renderPopupOrJson(c, http.StatusBadRequest, "Missing or non-existent task name")
 	}
 
-	files, err := m.filesystem.ListFiles()
+	files, err := m.Filesystem.ListFiles()
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Error listing files: %v", err))
 	}

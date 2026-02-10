@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/siherrmann/queuerManager/helper"
 	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
@@ -21,7 +20,7 @@ func (m *ManagerHandler) GetWorker(c *echo.Context) error {
 		return c.String(http.StatusBadRequest, "Invalid worker RID format")
 	}
 
-	worker, err := helper.Queuer.GetWorker(rid)
+	worker, err := m.Queuer.GetWorker(rid)
 	if err != nil {
 		return c.String(http.StatusNotFound, "Worker not found")
 	}
@@ -54,7 +53,7 @@ func (m *ManagerHandler) GetWorkers(c *echo.Context) error {
 		limit = parsedLimit
 	}
 
-	workers, err := helper.Queuer.GetWorkers(lastId, limit)
+	workers, err := m.Queuer.GetWorkers(lastId, limit)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to retrieve workers")
 	}
@@ -76,7 +75,7 @@ func (m *ManagerHandler) WorkerView(c *echo.Context) error {
 		return renderPopupOrJson(c, http.StatusBadRequest, fmt.Sprintf("Invalid worker RID: %v", err))
 	}
 
-	worker, err := helper.Queuer.GetWorker(rid)
+	worker, err := m.Queuer.GetWorker(rid)
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusNotFound, "Worker not found")
 	}
@@ -116,12 +115,12 @@ func (m *ManagerHandler) WorkersView(c *echo.Context) error {
 	var workers []*model.Worker
 	var err error
 	if search != "" {
-		workers, err = helper.Queuer.GetWorkersBySearch(search, lastId, limit)
+		workers, err = m.Queuer.GetWorkersBySearch(search, lastId, limit)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Failed to search workers")
 		}
 	} else {
-		workers, err = helper.Queuer.GetWorkers(lastId, limit)
+		workers, err = m.Queuer.GetWorkers(lastId, limit)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Failed to retrieve workers")
 		}
@@ -151,7 +150,7 @@ func (m *ManagerHandler) StopWorkersView(c *echo.Context) error {
 
 	// Stop each worker
 	for _, rid := range rids {
-		err := helper.Queuer.StopWorker(rid)
+		err := m.Queuer.StopWorker(rid)
 		if err != nil {
 			return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to stop worker %s: %v", rid, err))
 		}
@@ -178,7 +177,7 @@ func (m *ManagerHandler) StopWorkersGracefullyView(c *echo.Context) error {
 
 	// Gracefully stop each worker
 	for _, rid := range rids {
-		err := helper.Queuer.StopWorkerGracefully(rid)
+		err := m.Queuer.StopWorkerGracefully(rid)
 		if err != nil {
 			return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to gracefully stop worker %s: %v", rid, err))
 		}

@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/siherrmann/queuer"
 	"github.com/siherrmann/queuerManager/database"
 	"github.com/siherrmann/queuerManager/upload"
 
@@ -11,14 +12,16 @@ import (
 )
 
 type ManagerHandler struct {
-	filesystem upload.Filesystem
+	Queuer     *queuer.Queuer
+	Filesystem upload.Filesystem
 	validator  *validator.Validator
 	taskDB     *database.TaskDBHandler
 }
 
-func NewManagerHandler(filesystem upload.Filesystem, taskDB *database.TaskDBHandler) *ManagerHandler {
+func NewManagerHandler(filesystem upload.Filesystem, taskDB *database.TaskDBHandler, queuerInstance *queuer.Queuer) *ManagerHandler {
 	return &ManagerHandler{
-		filesystem: filesystem,
+		Queuer:     queuerInstance,
+		Filesystem: filesystem,
 		validator:  validator.NewValidator(),
 		taskDB:     taskDB,
 	}

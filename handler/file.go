@@ -37,7 +37,7 @@ func (m *ManagerHandler) UploadFiles(c *echo.Context) error {
 
 		// Generate safe filename (you might want to add UUID or timestamp for uniqueness)
 		filename := filepath.Base(fileHeader.Filename)
-		err = m.filesystem.Write(filename, file, fileHeader.Size)
+		err = m.Filesystem.Write(filename, file, fileHeader.Size)
 		if err != nil {
 			return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to save file %s: %v", filename, err))
 		}
@@ -52,7 +52,7 @@ func (m *ManagerHandler) UploadFiles(c *echo.Context) error {
 
 func (m *ManagerHandler) DeleteFile(c *echo.Context) error {
 	filename := c.Param("filename")
-	err := m.filesystem.Delete(filename)
+	err := m.Filesystem.Delete(filename)
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to delete file %s: %v", filename, err))
 	}
@@ -73,7 +73,7 @@ func (m *ManagerHandler) DeleteFiles(c *echo.Context) error {
 	var errors []string
 
 	for _, name := range names {
-		err := m.filesystem.Delete(name)
+		err := m.Filesystem.Delete(name)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("%s: %v", name, err))
 		} else {
@@ -97,7 +97,7 @@ func (m *ManagerHandler) FileView(c *echo.Context) error {
 		return renderPopupOrJson(c, http.StatusBadRequest, "File name is required")
 	}
 
-	files, err := m.filesystem.ListFiles()
+	files, err := m.Filesystem.ListFiles()
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to list files: %v", err))
 	}
@@ -124,7 +124,7 @@ func (m *ManagerHandler) FileView(c *echo.Context) error {
 func (m *ManagerHandler) FilesView(c *echo.Context) error {
 	search := c.QueryParam("search")
 
-	files, err := m.filesystem.ListFiles()
+	files, err := m.Filesystem.ListFiles()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{
 			"error": fmt.Sprintf("Failed to list files: %v", err),

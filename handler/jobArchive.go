@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/siherrmann/queuerManager/helper"
 	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
@@ -21,7 +20,7 @@ func (m *ManagerHandler) GetJobArchive(c *echo.Context) error {
 		return c.String(http.StatusBadRequest, "Invalid job archive RID format")
 	}
 
-	job, err := helper.Queuer.GetJobEnded(rid)
+	job, err := m.Queuer.GetJobEnded(rid)
 	if err != nil {
 		return c.String(http.StatusNotFound, "Archived job not found")
 	}
@@ -54,7 +53,7 @@ func (m *ManagerHandler) GetJobsArchive(c *echo.Context) error {
 		limit = parsedLimit
 	}
 
-	jobArchives, err := helper.Queuer.GetJobsEnded(lastId, limit)
+	jobArchives, err := m.Queuer.GetJobsEnded(lastId, limit)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Failed to retrieve archived jobs")
 	}
@@ -93,12 +92,12 @@ func (m *ManagerHandler) JobArchiveView(c *echo.Context) error {
 	var archivedJobs []*model.Job
 	var err error
 	if search != "" {
-		archivedJobs, err = helper.Queuer.GetJobsEndedBySearch(search, lastId, limit)
+		archivedJobs, err = m.Queuer.GetJobsEndedBySearch(search, lastId, limit)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Failed to search archived jobs")
 		}
 	} else {
-		archivedJobs, err = helper.Queuer.GetJobsEnded(lastId, limit)
+		archivedJobs, err = m.Queuer.GetJobsEnded(lastId, limit)
 		if err != nil {
 			return c.String(http.StatusInternalServerError, "Failed to retrieve archived jobs")
 		}
@@ -125,7 +124,7 @@ func (m *ManagerHandler) ReaddJobFromArchiveView(c *echo.Context) error {
 		return renderPopupOrJson(c, http.StatusBadRequest, fmt.Sprintf("Invalid job RID: %v", err))
 	}
 
-	readdedJob, err := helper.Queuer.ReaddJobFromArchive(rid)
+	readdedJob, err := m.Queuer.ReaddJobFromArchive(rid)
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to re-add job: %v", err))
 	}
