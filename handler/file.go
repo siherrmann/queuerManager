@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"manager/upload"
-	"manager/view/screens"
+	"github.com/siherrmann/queuerManager/upload"
+	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/labstack/echo/v4"
 )

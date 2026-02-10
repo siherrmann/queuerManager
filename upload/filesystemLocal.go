@@ -2,9 +2,10 @@ package upload
 
 import (
 	"io"
-	"manager/helper"
 	"os"
 	"path/filepath"
+
+	"github.com/siherrmann/queuerManager/helper"
 )
 
 // FilesystemLocal implements the Filesystem interface for local file storage

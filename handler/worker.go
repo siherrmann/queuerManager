@@ -2,10 +2,11 @@ package handler
 
 import (
 	"fmt"
-	"manager/helper"
-	"manager/view/screens"
 	"net/http"
 	"strconv"
+
+	"github.com/siherrmann/queuerManager/helper"
+	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"

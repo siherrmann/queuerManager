@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
-	"manager/database"
-	"manager/handler"
-	"manager/helper"
-	"manager/model"
-	"manager/upload"
 	"os"
 	"time"
+
+	"github.com/siherrmann/queuerManager/database"
+	"github.com/siherrmann/queuerManager/handler"
+	"github.com/siherrmann/queuerManager/helper"
+	"github.com/siherrmann/queuerManager/model"
+	"github.com/siherrmann/queuerManager/upload"
 
 	"github.com/labstack/echo/v4"
 	qh "github.com/siherrmann/queuer/helper"
@@ -78,8 +79,9 @@ func InitManagerHandler(ctx context.Context, cancel context.CancelFunc, maxConcu
 	// Load tasks from JSON file if path is provided
 	taskJSONPath := helper.GetEnvOrDefault("QUEUER_MANAGER_TASK_JSON", "")
 	if taskJSONPath != "" {
-		if err := loadTasksFromJSON(taskJSONPath, taskDB, logger); err != nil {
-			return nil, fmt.Errorf("failed to load tasks from JSON: %w", err)
+		err := loadTasksFromJSON(taskJSONPath, taskDB, logger)
+		if err != nil {
+			log.Printf("Failed to load tasks from JSON file: %v", err)
 		}
 	}
 

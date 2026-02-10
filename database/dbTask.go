@@ -6,8 +6,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"manager/model"
 	"time"
+
+	"github.com/siherrmann/queuerManager/model"
 
 	"github.com/google/uuid"
 	"github.com/siherrmann/queuer/helper"

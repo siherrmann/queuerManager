@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"manager/model"
+	"github.com/siherrmann/queuerManager/model"
 
 	"github.com/labstack/echo/v4"
 )

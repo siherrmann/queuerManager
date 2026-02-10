@@ -11,10 +11,10 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/siherrmann/queuerManager/model"
+	"github.com/siherrmann/queuerManager/view/components"
+	"github.com/siherrmann/queuerManager/view/layout"
 	vm "github.com/siherrmann/validator/model"
-	"manager/model"
-	"manager/view/components"
-	"manager/view/layout"
 	"strings"
 )
 

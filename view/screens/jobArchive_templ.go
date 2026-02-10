@@ -10,9 +10,9 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import (
 	qm "github.com/siherrmann/queuer/model"
-	"manager/model"
-	"manager/view/components"
-	"manager/view/layout"
+	"github.com/siherrmann/queuerManager/model"
+	"github.com/siherrmann/queuerManager/view/components"
+	"github.com/siherrmann/queuerManager/view/layout"
 )
 
 func JobArchive(archivedJobs []*qm.Job, search string) templ.Component {

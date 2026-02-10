@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"manager/model"
-	"manager/view/screens"
+	"github.com/siherrmann/queuerManager/model"
+	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"

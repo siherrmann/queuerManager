@@ -3,8 +3,9 @@ package handler
 import (
 	"fmt"
 	"log"
-	"manager/view/components"
 	"net/http"
+
+	"github.com/siherrmann/queuerManager/view/components"
 
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"

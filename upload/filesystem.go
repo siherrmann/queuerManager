@@ -3,9 +3,10 @@ package upload
 import (
 	"fmt"
 	"io"
-	"manager/helper"
 	"os"
 	"strings"
+
+	"github.com/siherrmann/queuerManager/helper"
 )
 
 const (

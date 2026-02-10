@@ -1,8 +1,9 @@
 package middleware
 
 import (
-	"manager/handler"
 	"net/http"
+
+	"github.com/siherrmann/queuerManager/handler"
 
 	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v4"

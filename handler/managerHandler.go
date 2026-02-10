@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"manager/database"
-	"manager/upload"
+	"github.com/siherrmann/queuerManager/database"
+	"github.com/siherrmann/queuerManager/upload"
 
 	"github.com/labstack/echo/v4"
 	"github.com/siherrmann/validator"

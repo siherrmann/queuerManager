@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"manager/helper"
 	"net/http"
+
+	"github.com/siherrmann/queuerManager/helper"
 
 	"github.com/labstack/echo/v4"
 )

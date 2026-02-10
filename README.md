@@ -50,7 +50,7 @@ The simplest way to start the manager is:
 package main
 
 import (
-    "manager/helper"
+    "github.com/siherrmann/queuerManager/helper"
 )
 
 func main() {

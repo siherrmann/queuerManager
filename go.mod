@@ -1,4 +1,4 @@
-module manager
+module github.com/siherrmann/queuerManager
 
 go 1.25.2
 

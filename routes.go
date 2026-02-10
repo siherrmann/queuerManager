@@ -1,8 +1,8 @@
 package main
 
 import (
-	"manager/handler"
-	mw "manager/middleware"
+	"github.com/siherrmann/queuerManager/handler"
+	mw "github.com/siherrmann/queuerManager/middleware"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

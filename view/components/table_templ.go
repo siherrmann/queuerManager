@@ -8,7 +8,7 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "manager/model"
+import "github.com/siherrmann/queuerManager/model"
 
 const HscriptOne string = `on selectionChanged
 							if length of (<input[id^='select_row_']:checked/> in closest <div[id^='full_table_']/>) === 1

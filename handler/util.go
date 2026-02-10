@@ -3,8 +3,9 @@ package handler
 import (
 	"context"
 	"fmt"
-	"manager/view/components"
 	"net/http"
+
+	"github.com/siherrmann/queuerManager/view/components"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"

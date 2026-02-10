@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"manager/view/screens"
+	"github.com/siherrmann/queuerManager/view/screens"
 
 	"github.com/labstack/echo/v4"
 )

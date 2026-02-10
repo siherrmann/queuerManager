@@ -2,9 +2,10 @@ package database
 
 import (
 	"fmt"
-	"manager/model"
 	"testing"
 	"time"
+
+	"github.com/siherrmann/queuerManager/model"
 
 	"github.com/google/uuid"
 	"github.com/siherrmann/queuer/helper"
