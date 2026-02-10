@@ -2,6 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/siherrmann/queuerManager.svg)](https://pkg.go.dev/github.com/siherrmann/queuerManager)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siherrmann/queuerManager/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/siherrmann/queuerManager)](http://goreportcard.com/report/siherrmann/queuerManager)
 
 A web-based management interface for the [queuer](https://github.com/siherrmann/queuer) job queueing system.
 
