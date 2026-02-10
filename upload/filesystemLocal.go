@@ -57,13 +57,21 @@ func (fs *FilesystemLocal) Delete(path string) error {
 func (fs *FilesystemLocal) ListFiles() ([]File, error) {
 	var files []File
 
-	err := filepath.Walk(fs.basePath, func(path string, info os.FileInfo, err error) error {
+	// 1. Resolve the symlink if the base path itself is one (e.g. ./uploads -> /app/uploads)
+	realBasePath, err := filepath.EvalSymlinks(fs.basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	// 2. Walk the resolved path (which is now a real directory)
+	err = filepath.Walk(realBasePath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
 		if !info.IsDir() {
-			relPath, err := filepath.Rel(fs.basePath, path)
+			// 3. Calculate relative path based on the resolved root
+			relPath, err := filepath.Rel(realBasePath, path)
 			if err != nil {
 				return err
 			}
