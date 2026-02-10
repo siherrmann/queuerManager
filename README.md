@@ -59,6 +59,8 @@ func main() {
 }
 ```
 
+As you are using it outside the package path, but in the package path there are static files (css, js and fonts) for the frontend, you have to copy the view folder into your own project. For covenience I added a `static.sh` file to the repo that does that for you (getting module path and copying the folder to the current folder).
+
 ### Environment Variables
 
 The manager uses the same database configuration as the queuer package:
