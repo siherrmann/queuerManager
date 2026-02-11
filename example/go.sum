@@ -118,6 +118,8 @@ github.com/labstack/echo/v5 v5.0.3 h1:Jql8sDtCYXrhh2Mbs6jKwjR6r7X8FSQQmch+w6QS7k
 github.com/labstack/echo/v5 v5.0.3/go.mod h1:SyvlSdObGjRXeQfCCXW/sybkZdOOQZBmpKF0bvALaeo=
 github.com/lib/pq v1.11.1 h1:wuChtj2hfsGmmx3nf1m7xC2XpK6OtelS2shMY+bGMtI=
 github.com/lib/pq v1.11.1/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
+github.com/lib/pq v1.11.2 h1:x6gxUeu39V0BHZiugWe8LXZYZ+Utk7hSJGThs8sdzfs=
+github.com/lib/pq v1.11.2/go.mod h1:/p+8NSbOcwzAEI7wiMXFlgydTwcgTr3OSKMsD2BitpA=
 github.com/lufia/plan9stats v0.0.0-20251013123823-9fd1530e3ec3 h1:PwQumkgq4/acIiZhtifTV5OUqqiP82UAl0h87xj/l9k=
 github.com/lufia/plan9stats v0.0.0-20251013123823-9fd1530e3ec3/go.mod h1:autxFIvghDt3jPTLoqZ9OZ7s9qTGNAWmYCjVFWPX/zg=
 github.com/magiconair/properties v1.8.10 h1:s31yESBquKXCV9a/ScB3ESkOjUYYv+X0rg8SYxI99mE=
@@ -164,6 +166,8 @@ github.com/siherrmann/queuer v1.68.0 h1:5mILT8hLHv0ccD6UGuAx24LvvbrfmQg2PRLB/axf
 github.com/siherrmann/queuer v1.68.0/go.mod h1:tPcC3loJ+xCbwRDYSKgQVjxUXIKEkfaJHM+I3n90ncg=
 github.com/siherrmann/queuerManager v0.4.0 h1:VG4Ai0+bE2BDpK1uyxTAPE3J5r6A1/yYuSnEu7jDDrA=
 github.com/siherrmann/queuerManager v0.4.0/go.mod h1:tmfq2Fwsz1LEManTRvqkPnHzjACehB/9awB4K58ZypE=
+github.com/siherrmann/queuerManager v0.7.0 h1:7VgkZEZU51x4G5OIHopj5jq3Cghqg0wUnGdjCTqrbgY=
+github.com/siherrmann/queuerManager v0.7.0/go.mod h1:tmfq2Fwsz1LEManTRvqkPnHzjACehB/9awB4K58ZypE=
 github.com/siherrmann/queuerSql v0.0.0-20260209162605-f0fc93dd45b9 h1:uOKX7kTgHgJVjmOghmpPVCph4rnESXgieTtzMyQ3Lag=
 github.com/siherrmann/queuerSql v0.0.0-20260209162605-f0fc93dd45b9/go.mod h1:P6LJ7qO4tT4IHQpqiL9IrH3qkwQ4KeQ08ptJBaSmYy0=
 github.com/siherrmann/validator v0.21.0 h1:RNICVFHO7Fw+67f7msORDoJx8jtbmenGS3IjkbJgP78=

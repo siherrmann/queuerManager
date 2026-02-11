@@ -5,26 +5,24 @@ import (
 	"path/filepath"
 
 	"github.com/go-git/go-billy/v5"
-	"github.com/go-git/go-billy/v5/osfs"
+	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/siherrmann/queuerManager/helper"
 )
 
-// FilesystemLocal implements the Filesystem interface for local file storage using go-billy's osfs
-type FilesystemLocal struct {
+// FilesystemMemory implements the Filesystem interface for in-memory file storage using go-billy's memfs
+type FilesystemMemory struct {
 	billy.Filesystem
-	basePath string
 }
 
-// NewFilesystemLocal creates a new local filesystem instance with the specified base path
-func NewFilesystemLocal(basePath string) Filesystem {
-	return &FilesystemLocal{
-		Filesystem: osfs.New(basePath),
-		basePath:   basePath,
+// NewFilesystemMemory creates a new in-memory filesystem instance
+func NewFilesystemMemory() Filesystem {
+	return &FilesystemMemory{
+		Filesystem: memfs.New(),
 	}
 }
 
 // Write streams data from reader to a file at the specified path
-func (fs *FilesystemLocal) Write(path string, reader io.Reader, size int64) error {
+func (fs *FilesystemMemory) Write(path string, reader io.Reader, size int64) error {
 	file, err := fs.Create(path)
 	if err != nil {
 		return err
@@ -36,7 +34,7 @@ func (fs *FilesystemLocal) Write(path string, reader io.Reader, size int64) erro
 }
 
 // ListFiles returns a list of all files in the filesystem
-func (fs *FilesystemLocal) ListFiles() ([]File, error) {
+func (fs *FilesystemMemory) ListFiles() ([]File, error) {
 	var files []File
 
 	// Helper function to walk the directory tree

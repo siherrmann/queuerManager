@@ -2,7 +2,7 @@ module example
 
 go 1.25.2
 
-require github.com/siherrmann/queuerManager v0.4.0
+require github.com/siherrmann/queuerManager v0.7.0
 
 require (
 	dario.cat/mergo v1.0.2 // indirect
@@ -52,7 +52,7 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/labstack/echo/v5 v5.0.3 // indirect
-	github.com/lib/pq v1.11.1 // indirect
+	github.com/lib/pq v1.11.2 // indirect
 	github.com/lufia/plan9stats v0.0.0-20251013123823-9fd1530e3ec3 // indirect
 	github.com/magiconair/properties v1.8.10 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect

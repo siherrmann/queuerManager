@@ -52,7 +52,7 @@ func (m *ManagerHandler) UploadFiles(c *echo.Context) error {
 
 func (m *ManagerHandler) DeleteFile(c *echo.Context) error {
 	filename := c.Param("filename")
-	err := m.Filesystem.Delete(filename)
+	err := m.Filesystem.Remove(filename)
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to delete file %s: %v", filename, err))
 	}
@@ -73,7 +73,7 @@ func (m *ManagerHandler) DeleteFiles(c *echo.Context) error {
 	var errors []string
 
 	for _, name := range names {
-		err := m.Filesystem.Delete(name)
+		err := m.Filesystem.Remove(name)
 		if err != nil {
 			errors = append(errors, fmt.Sprintf("%s: %v", name, err))
 		} else {

@@ -6,12 +6,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/go-git/go-billy/v5"
 	"github.com/siherrmann/queuerManager/helper"
 )
 
 const (
-	STORAGE_MODE_LOCAL = "local"
-	STORAGE_MODE_S3    = "s3"
+	STORAGE_MODE_LOCAL  = "local"
+	STORAGE_MODE_S3     = "s3"
+	STORAGE_MODE_MEMORY = "memory"
 )
 
 type File struct {
@@ -20,10 +22,10 @@ type File struct {
 	MimeType string
 }
 
+// Filesystem extends billy.Filesystem with additional utility methods
 type Filesystem interface {
+	billy.Filesystem
 	Write(path string, reader io.Reader, size int64) error
-	Open(path string) (io.ReadCloser, error)
-	Delete(path string) error
 	ListFiles() ([]File, error)
 }
 
@@ -45,10 +47,12 @@ func CreateFilesystemFromEnv() (Filesystem, error) {
 			return nil, fmt.Errorf("missing required S3 configuration: S3_BUCKET_NAME, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY")
 		}
 		return NewFilesystemS3(config)
+	case STORAGE_MODE_MEMORY:
+		return NewFilesystemMemory(), nil
 	case STORAGE_MODE_LOCAL:
 		basePath := helper.GetEnvOrDefault("QUEUER_MANAGER_STORAGE_PATH", "./uploads")
 		return NewFilesystemLocal(basePath), nil
 	default:
-		return nil, fmt.Errorf("unsupported storage mode: %s (supported: local, s3)", storageMode)
+		return nil, fmt.Errorf("unsupported storage mode: %s (supported: local, s3, memory)", storageMode)
 	}
 }

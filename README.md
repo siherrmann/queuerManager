@@ -1,6 +1,7 @@
 # queuerManager
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/siherrmann/queuerManager.svg)](https://pkg.go.dev/github.com/siherrmann/queuerManager)
+[![Go Coverage](https://github.com/siherrmann/queuerManager/wiki/coverage.svg)](https://raw.githack.com/wiki/siherrmann/queuerManager/coverage.html)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/siherrmann/queuerManager/blob/master/LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/siherrmann/queuerManager)](http://goreportcard.com/report/siherrmann/queuerManager)
 

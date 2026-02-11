@@ -52,10 +52,29 @@ func (m *ManagerHandler) AddJob(c *echo.Context) error {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to add job: %v", err))
 	}
 
-	c.Response().Header().Add("HX-Push-Url", fmt.Sprintf("/job?rid=%s", jobAdded.RID.String()))
+	c.Response().Header().Add("HX-Redirect", fmt.Sprintf("/job?rid=%s", jobAdded.RID.String()))
 	c.Response().Header().Add("HX-Retarget", "#body")
 
 	return render(c, screens.Job(jobAdded))
+}
+
+// GetJob retrieves a specific job by RID
+func (m *ManagerHandler) GetJob(c *echo.Context) error {
+	ridStr := c.Param("rid")
+	rid, err := uuid.Parse(ridStr)
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid job RID format")
+	}
+
+	job, err := m.Queuer.GetJob(rid)
+	if err != nil {
+		job, err = m.Queuer.GetJobEnded(rid)
+		if err != nil {
+			return c.String(http.StatusNotFound, "Job not found")
+		}
+	}
+
+	return c.JSON(http.StatusOK, job)
 }
 
 // GetJobs retrieves a paginated list of jobs
