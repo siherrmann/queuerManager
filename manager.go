@@ -26,12 +26,25 @@ func ManagerServer(port string, maxConcurrency int) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	// Initialize queuer instance
 	queuerInstance := queuer.NewQueuer("manager-server", maxConcurrency)
 
+	// Initialize manager handler
 	mh, err := InitManagerHandler(ctx, cancel, queuerInstance)
 	if err != nil {
 		log.Fatalf("Failed to initialize manager handler: %v", err)
 	}
+
+	// Start the queuer with master settings
+	masterSettings := &qmodel.MasterSettings{
+		MasterLockTimeout:     time.Minute * 1,
+		MasterPollInterval:    time.Second * 10,
+		WorkerStaleThreshold:  time.Minute * 5,
+		WorkerDeleteThreshold: time.Minute * 100,
+		JobStaleThreshold:     time.Minute * 10,
+		JobDeleteThreshold:    time.Minute * 100,
+	}
+	mh.Queuer.Start(ctx, cancel, masterSettings)
 
 	e := echo.New()
 	SetupRoutes(e, mh)
@@ -84,17 +97,6 @@ func InitManagerHandler(ctx context.Context, cancel context.CancelFunc, queuerIn
 
 	// Create and configure manager handler
 	mh := handler.NewManagerHandler(filesystem, taskDB, queuerInstance)
-
-	// Start the queuer with master settings
-	masterSettings := &qmodel.MasterSettings{
-		MasterLockTimeout:     time.Minute * 1,
-		MasterPollInterval:    time.Second * 10,
-		WorkerStaleThreshold:  time.Minute * 5,
-		WorkerDeleteThreshold: time.Minute * 100,
-		JobStaleThreshold:     time.Minute * 10,
-		JobDeleteThreshold:    time.Minute * 100,
-	}
-	mh.Queuer.Start(ctx, cancel, masterSettings)
 
 	return mh, nil
 }
