@@ -72,15 +72,15 @@ func renderPopupOrJson(c *echo.Context, status int, value ...any) error {
 		}
 	}
 
-	// Otherwise, return JSON with message if first value is string
-	values := map[string]any{}
-	for i, v := range value {
-		if message, ok := value[0].(string); ok && i == 0 {
-			values["message"] = message
-		} else {
-			values["value"] = v
+	// Otherwise, return JSON
+	// If single value that is a string, wrap in message object
+	if len(value) == 1 {
+		if message, ok := value[0].(string); ok {
+			return c.JSON(status, map[string]any{"message": message})
 		}
+		// Single non-string value, return it directly
+		return c.JSON(status, value[0])
 	}
-
+	// Multiple values, return as array
 	return c.JSON(status, value)
 }

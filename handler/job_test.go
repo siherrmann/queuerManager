@@ -263,18 +263,8 @@ func TestCancelJobHandler(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 
-		// renderPopupOrJson returns value array directly, so we get an array with one item
-		var response []interface{}
-		err = json.Unmarshal(rec.Body.Bytes(), &response)
-		require.NoError(t, err)
-		assert.Equal(t, 1, len(response))
-
-		// Re-marshal the first item to get the job
-		jobBytes, err := json.Marshal(response[0])
-		require.NoError(t, err)
-
 		var cancelledJob model.Job
-		err = json.Unmarshal(jobBytes, &cancelledJob)
+		err = json.Unmarshal(rec.Body.Bytes(), &cancelledJob)
 		require.NoError(t, err)
 		assert.Equal(t, job.RID, cancelledJob.RID)
 	})
