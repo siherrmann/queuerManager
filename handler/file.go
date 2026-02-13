@@ -45,6 +45,7 @@ func (m *ManagerHandler) UploadFiles(c *echo.Context) error {
 		uploadedFiles = append(uploadedFiles, filename)
 	}
 
+	// TODO add loader on trigger
 	c.Response().Header().Add("HX-Trigger-After-Settle", "reloadFiles")
 
 	return renderPopupOrJson(c, http.StatusOK, fmt.Sprintf("%v file(s) uploaded successfully", len(uploadedFiles)))

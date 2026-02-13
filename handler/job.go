@@ -53,9 +53,8 @@ func (m *ManagerHandler) AddJob(c *echo.Context) error {
 	}
 
 	c.Response().Header().Add("HX-Redirect", fmt.Sprintf("/job?rid=%s", jobAdded.RID.String()))
-	c.Response().Header().Add("HX-Retarget", "#body")
 
-	return render(c, screens.Job(jobAdded))
+	return renderPopupOrJson(c, http.StatusOK, jobAdded)
 }
 
 // GetJob retrieves a specific job by RID
@@ -63,18 +62,18 @@ func (m *ManagerHandler) GetJob(c *echo.Context) error {
 	ridStr := c.Param("rid")
 	rid, err := uuid.Parse(ridStr)
 	if err != nil {
-		return c.String(http.StatusBadRequest, "Invalid job RID format")
+		return renderPopupOrJson(c, http.StatusBadRequest, "Invalid job RID format")
 	}
 
 	job, err := m.Queuer.GetJob(rid)
 	if err != nil {
 		job, err = m.Queuer.GetJobEnded(rid)
 		if err != nil {
-			return c.String(http.StatusNotFound, "Job not found")
+			return renderPopupOrJson(c, http.StatusNotFound, "Job not found")
 		}
 	}
 
-	return c.JSON(http.StatusOK, job)
+	return renderPopupOrJson(c, http.StatusOK, job)
 }
 
 // GetJobs retrieves a paginated list of jobs
@@ -87,7 +86,7 @@ func (m *ManagerHandler) GetJobs(c *echo.Context) error {
 	if lastIdStr != "" {
 		parsedLastId, err := strconv.Atoi(lastIdStr)
 		if err != nil || parsedLastId < 0 {
-			return c.String(http.StatusBadRequest, "Invalid lastId format")
+			return renderPopupOrJson(c, http.StatusBadRequest, "Invalid lastId format")
 		}
 		lastId = parsedLastId
 	}
@@ -97,17 +96,17 @@ func (m *ManagerHandler) GetJobs(c *echo.Context) error {
 	if limitStr != "" {
 		parsedLimit, err := strconv.Atoi(limitStr)
 		if err != nil || parsedLimit <= 0 || parsedLimit > 100 {
-			return c.String(http.StatusBadRequest, "Invalid limit (must be 1-100)")
+			return renderPopupOrJson(c, http.StatusBadRequest, "Invalid limit (must be 1-100)")
 		}
 		limit = parsedLimit
 	}
 
 	jobs, err := m.Queuer.GetJobs(lastId, limit)
 	if err != nil {
-		return c.String(http.StatusInternalServerError, "Failed to retrieve jobs")
+		return renderPopupOrJson(c, http.StatusInternalServerError, "Failed to retrieve jobs")
 	}
 
-	return c.JSON(http.StatusOK, jobs)
+	return renderPopupOrJson(c, http.StatusOK, jobs)
 }
 
 // CancelJob cancels a specific job by RID
@@ -122,6 +121,8 @@ func (m *ManagerHandler) CancelJob(c *echo.Context) error {
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, "Failed to cancel job")
 	}
+
+	c.Response().Header().Add("HX-Redirect", "/jobArchive")
 
 	return renderPopupOrJson(c, http.StatusOK, cancelledJob)
 }
@@ -155,6 +156,8 @@ func (m *ManagerHandler) CancelJobs(c *echo.Context) error {
 		cancelledJobs = append(cancelledJobs, cancelledJob)
 	}
 
+	c.Response().Header().Add("HX-Redirect", "/jobArchive")
+
 	return renderPopupOrJson(c, http.StatusOK, fmt.Sprintf("%v jobs cancelled successfully", len(cancelledJobs)))
 }
 
@@ -170,6 +173,9 @@ func (m *ManagerHandler) DeleteJob(c *echo.Context) error {
 	if err != nil {
 		return renderPopupOrJson(c, http.StatusInternalServerError, fmt.Sprintf("Failed to delete job: %v", err))
 	}
+
+	// TODO add loader on trigger
+	c.Response().Header().Add("HX-Trigger-After-Settle", "reloadJobArchive")
 
 	return renderPopupOrJson(c, http.StatusOK, "Job deleted successfully")
 }
