@@ -59,7 +59,8 @@ func SetupRoutes(e *echo.Echo, h *handler.ManagerHandler) {
 	jobs.POST("/cancelJob/:rid", h.CancelJob)
 	jobs.POST("/cancelJobs", h.CancelJobs)
 	jobs.POST("/deleteJob/:rid", h.DeleteJob)
-	jobs.GET("/getJobs", h.GetJobs)
+	jobs.POST("/getJob/:rid", h.GetJob)
+	jobs.POST("/getJobs", h.GetJobs)
 
 	jobArchives := api.Group("/jobArchive")
 	jobArchives.GET("/getJob/:rid", h.GetJobArchive)
