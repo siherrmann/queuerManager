@@ -22,35 +22,34 @@ func SetupRoutes(e *echo.Echo, h *handler.ManagerHandler) {
 
 	// Custom Middleware
 	m := mw.NewMiddleware()
-	e.Use(m.CsrfMiddleware())
 	e.Use(m.RequestContextMiddleware)
 
 	// View routes
-	e.GET("/health", h.HealthCheck)
-	e.GET("/", h.AddJobView)
-	e.GET("/task/:taskKey", h.AddJobConfigView)
+	e.GET("/health", h.HealthCheck, m.CsrfMiddleware())
+	e.GET("/", h.AddJobView, m.CsrfMiddleware())
+	e.GET("/task/:taskKey", h.AddJobConfigView, m.CsrfMiddleware())
 
-	e.GET("/files", h.FilesView)
-	e.GET("/file", h.FileView)
-	e.GET("/file/addFilePopup", h.AddFilePopupView)
-	e.GET("/file/deleteFilePopup", h.DeleteFilePopupView)
+	e.GET("/files", h.FilesView, m.CsrfMiddleware())
+	e.GET("/file", h.FileView, m.CsrfMiddleware())
+	e.GET("/file/addFilePopup", h.AddFilePopupView, m.CsrfMiddleware())
+	e.GET("/file/deleteFilePopup", h.DeleteFilePopupView, m.CsrfMiddleware())
 
-	e.GET("/job", h.JobView)
-	e.GET("/jobs", h.JobsView)
-	e.GET("/jobArchive", h.JobArchiveView)
-	e.GET("/jobArchive/readdJob", h.ReaddJobFromArchiveView)
+	e.GET("/job", h.JobView, m.CsrfMiddleware())
+	e.GET("/jobs", h.JobsView, m.CsrfMiddleware())
+	e.GET("/jobArchive", h.JobArchiveView, m.CsrfMiddleware())
+	e.GET("/jobArchive/readdJob", h.ReaddJobFromArchiveView, m.CsrfMiddleware())
 
-	e.GET("/worker", h.WorkerView)
-	e.GET("/workers", h.WorkersView)
-	e.GET("/worker/stopWorkers", h.StopWorkersView)
-	e.GET("/worker/stopWorkersGracefully", h.StopWorkersGracefullyView)
+	e.GET("/worker", h.WorkerView, m.CsrfMiddleware())
+	e.GET("/workers", h.WorkersView, m.CsrfMiddleware())
+	e.GET("/worker/stopWorkers", h.StopWorkersView, m.CsrfMiddleware())
+	e.GET("/worker/stopWorkersGracefully", h.StopWorkersGracefullyView, m.CsrfMiddleware())
 
-	e.GET("/tasks", h.TasksView)
-	e.GET("/task", h.TaskView)
-	e.GET("/task/addTaskPopup", h.AddTaskPopupView)
-	e.GET("/task/updateTaskPopup", h.UpdateTaskPopupView)
-	e.GET("/task/deleteTaskPopup", h.DeleteTaskPopupView)
-	e.GET("/task/importTaskPopup", h.ImportTaskPopupView)
+	e.GET("/tasks", h.TasksView, m.CsrfMiddleware())
+	e.GET("/task", h.TaskView, m.CsrfMiddleware())
+	e.GET("/task/addTaskPopup", h.AddTaskPopupView, m.CsrfMiddleware())
+	e.GET("/task/updateTaskPopup", h.UpdateTaskPopupView, m.CsrfMiddleware())
+	e.GET("/task/deleteTaskPopup", h.DeleteTaskPopupView, m.CsrfMiddleware())
+	e.GET("/task/importTaskPopup", h.ImportTaskPopupView, m.CsrfMiddleware())
 
 	// API routes
 	api := e.Group("/api")
