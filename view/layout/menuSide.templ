@@ -1,5 +1,17 @@
 package layout
 
+import (
+	"context"
+	"github.com/siherrmann/queuerManager/model"
+)
+
+func getSidebarItems(ctx context.Context) []model.SidebarItem {
+	if items, ok := ctx.Value("sidebarItems").([]model.SidebarItem); ok {
+		return items
+	}
+	return nil
+}
+
 templ MenuSide(active string) {
 	<!-- Mobile menu button -->
 	<button
@@ -42,6 +54,9 @@ templ MenuSide(active string) {
 				@MenuSideButton("Workers", "engineering", "/workers", active, true)
 				@MenuSideButton("Tasks", "task", "/tasks", active, true)
 				@MenuSideButton("Files", "folder", "/files", active, true)
+				for _, item := range getSidebarItems(ctx) {
+					@MenuSideButton(item.Title, item.MaterialIcon, item.Href, active, true)
+				}
 			</nav>
 		</aside>
 	</div>
@@ -58,6 +73,9 @@ templ MenuSide(active string) {
 			@MenuSideButton("Workers", "engineering", "/workers", active, false)
 			@MenuSideButton("Tasks", "task", "/tasks", active, false)
 			@MenuSideButton("Files", "folder", "/files", active, false)
+			for _, item := range getSidebarItems(ctx) {
+				@MenuSideButton(item.Title, item.MaterialIcon, item.Href, active, false)
+			}
 		</nav>
 	</aside>
 }

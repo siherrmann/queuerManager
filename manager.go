@@ -21,18 +21,55 @@ import (
 	qmodel "github.com/siherrmann/queuer/model"
 )
 
-// ManagerServer initializes the manager handler, sets up routes, and starts the Echo server.
-func ManagerServer(port string, maxConcurrency int) {
+type ManagerApp struct {
+	Port           string
+	MaxConcurrency int
+	StaticDir      string
+	Extensions     []Extension
+
+	// internals
+	mh     *handler.ManagerHandler
+	echo   *echo.Echo
+	ctx    context.Context
+	cancel context.CancelFunc
+}
+
+func NewManagerApp(port string, maxConcurrency int) *ManagerApp {
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	return &ManagerApp{
+		Port:           port,
+		MaxConcurrency: maxConcurrency,
+		StaticDir:      "./view/static",
+		Extensions:     []Extension{},
+		ctx:            ctx,
+		cancel:         cancel,
+	}
+}
+
+func (app *ManagerApp) RegisterExtension(ext Extension) {
+	app.Extensions = append(app.Extensions, ext)
+}
+
+func (app *ManagerApp) Start() {
+	defer app.cancel()
 
 	// Initialize queuer instance
-	queuerInstance := queuer.NewQueuer("manager-server", maxConcurrency)
+	queuerInstance := queuer.NewQueuer("manager-server", app.MaxConcurrency)
 
 	// Initialize manager handler
-	mh, err := InitManagerHandler(ctx, cancel, queuerInstance)
+	mh, err := InitManagerHandler(app.ctx, app.cancel, queuerInstance)
 	if err != nil {
 		log.Fatalf("Failed to initialize manager handler: %v", err)
+	}
+	app.mh = mh
+
+	// Initialize extensions and collect sidebar items
+	var sidebarItems []model.SidebarItem
+	for _, ext := range app.Extensions {
+		if err := ext.Init(app.ctx, app.mh); err != nil {
+			log.Fatalf("Failed to initialize extension: %v", err)
+		}
+		sidebarItems = append(sidebarItems, ext.SidebarItems()...)
 	}
 
 	// Start the queuer with master settings
@@ -44,18 +81,42 @@ func ManagerServer(port string, maxConcurrency int) {
 		JobStaleThreshold:     time.Minute * 10,
 		JobDeleteThreshold:    time.Minute * 100,
 	}
-	mh.Queuer.Start(ctx, cancel, masterSettings)
+	app.mh.Queuer.Start(app.ctx, app.cancel, masterSettings)
 
-	e := echo.New()
-	SetupRoutes(e, mh)
+	app.echo = echo.New()
 
-	err = e.Start(":" + port)
+	// Custom Sidebar Middleware
+	app.echo.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c *echo.Context) error {
+			req := c.Request()
+			ctx := context.WithValue(req.Context(), "sidebarItems", sidebarItems)
+			c.SetRequest(req.WithContext(ctx))
+			return next(c)
+		}
+	})
+
+	SetupRoutes(app.echo, app.mh)
+	app.echo.Static("/static/", app.StaticDir)
+
+	// Setup extension routes
+	for _, ext := range app.Extensions {
+		ext.SetupRoutes(app.echo, app.mh)
+	}
+
+	err = app.echo.Start(":" + app.Port)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
 
-	<-ctx.Done()
+	<-app.ctx.Done()
 	slog.Info("Shutting down manager server")
+}
+
+// ManagerServer initializes the manager handler, sets up routes, and starts the Echo server.
+// Preserved for backward compatibility.
+func ManagerServer(port string, maxConcurrency int) {
+	app := NewManagerApp(port, maxConcurrency)
+	app.Start()
 }
 
 // InitManagerHandler creates and configures the manager handler, including initializing the queuer, setting up the filesystem, and loading tasks from a JSON file if specified.

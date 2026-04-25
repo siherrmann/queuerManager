@@ -91,5 +91,4 @@ func SetupRoutes(e *echo.Echo, h *handler.ManagerHandler) {
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{
 		Level: 5,
 	}))
-	e.Static("/static/", "./view/static")
 }
