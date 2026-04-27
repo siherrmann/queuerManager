@@ -40,8 +40,13 @@ templ File(file upload.File) {
 	@layout.Index("File Details") {
 		@layout.MenuSide("Files")
 		@layout.InnerBody() {
+			@components.Breadcrumbs([]components.BreadcrumbItem{
+				{Name: "Home", URL: "/"},
+				{Name: "Files", URL: "/files"},
+				{Name: file.Name, URL: ""},
+			})
 			<!-- CARD: File Information -->
-			<div class="bg-white p-6 rounded-xl shadow-lg">
+			<div class="bg-white p-6 rounded-xl shadow-lg" style="margin-bottom: 32px;">
 				@components.Topbar(
 					"File",
 					nil,
@@ -82,7 +87,11 @@ templ Files(files []upload.File, search string) {
 	@layout.Index("Files") {
 		@layout.MenuSide("Files")
 		@layout.InnerBody() {
-			<div class="bg-white p-6 rounded-xl shadow-lg">
+			@components.Breadcrumbs([]components.BreadcrumbItem{
+				{Name: "Home", URL: "/"},
+				{Name: "Files", URL: ""},
+			})
+			<div class="bg-white p-6 rounded-xl shadow-lg" style="margin-bottom: 32px;">
 				@FilesTable(files, search)
 			</div>
 		}

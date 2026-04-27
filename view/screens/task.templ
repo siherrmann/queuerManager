@@ -42,8 +42,13 @@ templ Task(task *model.Task) {
 	@layout.Index("Task Details") {
 		@layout.MenuSide("Tasks")
 		@layout.InnerBody() {
+			@components.Breadcrumbs([]components.BreadcrumbItem{
+				{Name: "Home", URL: "/"},
+				{Name: "Tasks", URL: "/tasks"},
+				{Name: task.Name, URL: ""},
+			})
 			<!-- CARD: Task Information -->
-			<div class="bg-white p-6 rounded-xl shadow-lg">
+			<div class="bg-white p-6 rounded-xl shadow-lg" style="margin-bottom: 32px;">
 				@components.Topbar(
 					"Tasks",
 					nil,
@@ -107,7 +112,11 @@ templ Tasks(tasks []*model.Task, search string) {
 	@layout.Index("Tasks") {
 		@layout.MenuSide("Tasks")
 		@layout.InnerBody() {
-			<div class="bg-white p-6 rounded-xl shadow-lg">
+			@components.Breadcrumbs([]components.BreadcrumbItem{
+				{Name: "Home", URL: "/"},
+				{Name: "Tasks", URL: ""},
+			})
+			<div class="bg-white p-6 rounded-xl shadow-lg" style="margin-bottom: 32px;">
 				@TasksTable(tasks, search)
 			</div>
 		}

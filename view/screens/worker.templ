@@ -30,8 +30,13 @@ templ Worker(worker *qm.Worker) {
 	@layout.Index("Worker Details") {
 		@layout.MenuSide("Workers")
 		@layout.InnerBody() {
+			@components.Breadcrumbs([]components.BreadcrumbItem{
+				{Name: "Home", URL: "/"},
+				{Name: "Workers", URL: "/workers"},
+				{Name: worker.RID.String(), URL: ""},
+			})
 			<!-- CARD: Worker Information -->
-			<div class="bg-white p-6 rounded-xl shadow-lg">
+			<div class="bg-white p-6 rounded-xl shadow-lg" style="margin-bottom: 32px;">
 				@components.Topbar(
 					"Worker",
 					nil,
@@ -75,7 +80,11 @@ templ Workers(workers []*qm.Worker, search string) {
 	@layout.Index("Workers") {
 		@layout.MenuSide("Workers")
 		@layout.InnerBody() {
-			<div class="bg-white p-6 rounded-xl shadow-lg">
+			@components.Breadcrumbs([]components.BreadcrumbItem{
+				{Name: "Home", URL: "/"},
+				{Name: "Workers", URL: ""},
+			})
+			<div class="bg-white p-6 rounded-xl shadow-lg" style="margin-bottom: 32px;">
 				@WorkersTable(workers, search)
 			</div>
 		}

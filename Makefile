@@ -13,21 +13,21 @@ install:
 # With `go run .` i works, but with the filewatcher (wgo) it does not kill the inner process
 clean:
 	@clear; \
-	PID=$$(pgrep -f htmxConcept); \
+	PID=$$(pgrep -f queuerManager); \
 	if [ -n "$$PID" ]; then \
 		kill -9 $$PID; \
 		echo "Killed process $$PID"; \
 	else \
-		echo "No programm running with name htmxConcept"; \
+		echo "No programm running with name queuerManager"; \
 	fi;
 
 # Run server with hot reload and go file watcher
 # With --proxy="http://localhost:2323" (which opens the browser tab with the website) it seems
 # to be much more prone to the error of not quitting processes.
 # server: clean
-#	templ generate --watch --cmd 'wgo run . -name htmxConcept'
+#	templ generate --watch --cmd 'wgo run . -name queuerManager'
 server:
-	wgo -file .go -file .templ -xfile _templ.go clear :: templ generate :: go run . -name htmxConcept
+	wgo -file .go -file .templ -xfile _templ.go clear :: templ generate :: sh -c 'cd example && go run . -name queuerManager'
 
 # Run tailwind watcher
 tailwind:

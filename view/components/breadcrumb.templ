@@ -1,0 +1,32 @@
+package components
+
+type BreadcrumbItem struct {
+	Name string
+	URL  string
+}
+
+templ Breadcrumbs(items []BreadcrumbItem) {
+	<nav class="flex text-sm text-gray-500 font-medium bg-white p-4 rounded-xl shadow-lg" style="margin-bottom: 24px;" aria-label="Breadcrumb">
+		<ol class="inline-flex items-center space-x-1 md:space-x-3">
+			for i, item := range items {
+				<li class="inline-flex items-center">
+					if i > 0 {
+						<span class="material-icons text-gray-400 text-sm mx-2">chevron_right</span>
+					}
+					if i == len(items)-1 {
+						<span class="text-indigo-600 font-semibold" aria-current="page">{ item.Name }</span>
+					} else if item.URL != "" {
+						<a href={ templ.SafeURL(item.URL) } class="inline-flex items-center hover:text-indigo-600 transition">
+							if i == 0 {
+								<span class="material-icons text-base mr-1">home</span>
+							}
+							{ item.Name }
+						</a>
+					} else {
+						<span class="text-gray-500">{ item.Name }</span>
+					}
+				</li>
+			}
+		</ol>
+	</nav>
+}

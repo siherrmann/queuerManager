@@ -68,7 +68,14 @@ func JobArchive(archivedJobs []*qm.Job, search string) templ.Component {
 					}()
 				}
 				ctx = templ.InitializeContext(ctx)
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div class=\"bg-white p-6 rounded-xl shadow-lg\">")
+				templ_7745c5c3_Err = components.Breadcrumbs([]components.BreadcrumbItem{
+					{Name: "Home", URL: "/"},
+					{Name: "Job Archive", URL: ""},
+				}).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " <div class=\"bg-white p-6 rounded-xl shadow-lg\" style=\"margin-bottom: 32px;\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
