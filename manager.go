@@ -17,6 +17,7 @@ import (
 	"github.com/siherrmann/queuerManager/upload"
 
 	"github.com/labstack/echo/v5"
+	"github.com/a-h/templ"
 	qh "github.com/siherrmann/queuer/helper"
 	qmodel "github.com/siherrmann/queuer/model"
 )
@@ -26,6 +27,7 @@ type ManagerApp struct {
 	MaxConcurrency int
 	StaticDir      string
 	Extensions     []Extension
+	SidebarLogo    templ.Component
 
 	// internals
 	mh     *handler.ManagerHandler
@@ -90,6 +92,9 @@ func (app *ManagerApp) Start() {
 		return func(c *echo.Context) error {
 			req := c.Request()
 			ctx := context.WithValue(req.Context(), "sidebarItems", sidebarItems)
+			if app.SidebarLogo != nil {
+				ctx = context.WithValue(ctx, "sidebarLogo", app.SidebarLogo)
+			}
 			c.SetRequest(req.WithContext(ctx))
 			return next(c)
 		}

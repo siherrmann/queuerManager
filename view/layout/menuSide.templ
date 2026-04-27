@@ -12,6 +12,17 @@ func getSidebarItems(ctx context.Context) []model.SidebarItem {
 	return nil
 }
 
+func getSidebarLogo(ctx context.Context) templ.Component {
+	if logo, ok := ctx.Value("sidebarLogo").(templ.Component); ok {
+		return logo
+	}
+	return defaultSidebarLogo()
+}
+
+templ defaultSidebarLogo() {
+	<span class="text-xl font-semibold tracking-wider text-white">QUEUER</span>
+}
+
 templ MenuSide(active string) {
 	<!-- Mobile menu button -->
 	<button
@@ -36,7 +47,7 @@ templ MenuSide(active string) {
 			<div class="p-6 flex items-center justify-between border-b border-gray-800">
 				<div class="flex items-center space-x-3">
 					<span class="material-icons text-lime-400">pending_actions</span>
-					<span class="text-xl font-semibold tracking-wider text-white">QUEUER</span>
+					@getSidebarLogo(ctx)
 				</div>
 				<button
 					type="button"
@@ -64,7 +75,7 @@ templ MenuSide(active string) {
 	<aside class="hidden lg:flex w-64 bg-gray-900 text-gray-100 flex-col shadow-2xl rounded-tr-xl rounded-br-xl">
 		<div class="p-6 flex items-center space-x-3 border-b border-gray-800">
 			<span class="material-icons text-lime-400">pending_actions</span>
-			<span class="text-xl font-semibold tracking-wider text-white">QUEUER</span>
+			@getSidebarLogo(ctx)
 		</div>
 		<nav class="grow p-4 space-y-2" role="navigation" aria-label="Main navigation">
 			@MenuSideButton("Add job", "assignment_add", "/", active, false)

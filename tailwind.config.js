@@ -5,7 +5,7 @@
 module.exports = {
   darkMode: "selector",
   // important: true,
-  content: ["view/**/*.templ", "view/static/**/*.html"],
+  content: ["view/**/*.templ", "view/static/**/*.html", "../queuerManagerPro/view/**/*.templ"],
   safelist: [
     {
       pattern: /^(?!(?:scroll|bottom)$)m\w?-/,
