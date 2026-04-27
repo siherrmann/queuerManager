@@ -184,7 +184,8 @@ async function saveFlowData() {
         } else if (
           part.type === "flow_parameter" ||
           part.type === "const_parameter" ||
-          part.type === "if_else"
+          part.type === "if_else" ||
+          part.type === "custom_data"
         ) {
           // Load block cards
           loadPromises.push(
