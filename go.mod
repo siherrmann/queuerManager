@@ -1,6 +1,6 @@
 module github.com/siherrmann/queuerManager
 
-go 1.26.4
+go 1.26.0
 
 require (
 	github.com/a-h/templ v0.3.1020
