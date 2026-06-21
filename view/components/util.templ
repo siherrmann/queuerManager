@@ -3,7 +3,7 @@ package components
 import qm "github.com/siherrmann/queuer/model"
 
 templ CSRF() {
-	<input type="hidden" name="gorilla.csrf.Token" value={ ctx.Value("gorilla.csrf.Token").(string) }/>
+	<input type="hidden" name="gorilla.csrf.Token" value=""/>
 }
 
 type FormConf struct {

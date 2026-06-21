@@ -8,7 +8,6 @@ import (
 
 	"github.com/siherrmann/queuerManager/view/components"
 
-	"github.com/gorilla/csrf"
 	"github.com/labstack/echo/v5"
 )
 
@@ -29,9 +28,8 @@ func HandleErrorView(err error, c *echo.Context) {
 }
 
 func HandleCSRFErrorView(w http.ResponseWriter, r *http.Request) {
-	err := csrf.FailureReason(r)
-	log.Printf("CSRF error: %v", err)
-	err = renderPopupHTTP(w, components.PopupError("Error", "Invalid CSRF token, please reload the page."))
+	log.Printf("CSRF/CrossOrigin error: request to %s rejected", r.URL.Path)
+	err := renderPopupHTTP(w, components.PopupError("Error", "Security verification failed. Please reload the page."))
 	if err != nil {
 		log.Printf("Failed to render CSRF error popup: %v", err)
 	}

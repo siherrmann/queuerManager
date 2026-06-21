@@ -1,5 +1,5 @@
 MAKEFLAGS += -j2
-.PHONY: run install clean server tailwind
+.PHONY: run install clean server tailwind build
 
 # Run server
 run: server tailwind
@@ -32,3 +32,6 @@ server:
 # Run tailwind watcher
 tailwind:
 	@npx @tailwindcss/cli -i ./view/static/styles/index.css -o ./view/static/styles/output.css --watch
+
+build:
+	go build -o bin/queuermanager ./cmd/queuermanager
