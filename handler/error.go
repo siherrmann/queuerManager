@@ -28,7 +28,8 @@ func HandleErrorView(err error, c *echo.Context) {
 }
 
 func HandleCSRFErrorView(w http.ResponseWriter, r *http.Request) {
-	log.Printf("CSRF/CrossOrigin error: request to %s rejected", r.URL.Path)
+	// #nosec G706 -- r.URL.EscapedPath() is used to prevent log injection/splitting
+	log.Printf("CSRF/CrossOrigin error: request to %s rejected", r.URL.EscapedPath())
 	err := renderPopupHTTP(w, components.PopupError("Error", "Security verification failed. Please reload the page."))
 	if err != nil {
 		log.Printf("Failed to render CSRF error popup: %v", err)
