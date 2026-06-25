@@ -2,10 +2,6 @@ package components
 
 import qm "github.com/siherrmann/queuer/model"
 
-templ CSRF() {
-	<input type="hidden" name="gorilla.csrf.Token" value=""/>
-}
-
 type FormConf struct {
 	HxPost     string
 	HxInclude  string
@@ -21,7 +17,6 @@ templ Form(conf FormConf) {
 		method="POST"
 		hx-swap="none"
 		hx-push-url="false"
-		hx-headers={ `js:{"X-CSRF-Token": document.getElementsByName('gorilla.csrf.Token')[0].value}` }
 		if len(conf.HxInclude) > 0 {
 			hx-include={ conf.HxInclude }
 		}
@@ -36,7 +31,6 @@ templ Form(conf FormConf) {
 		}
 		class={ conf.Class }
 	>
-		@CSRF()
 		{ children... }
 	</form>
 }

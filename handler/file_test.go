@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"context"
 	"log/slog"
 	"mime/multipart"
 	"net/http"
@@ -336,9 +335,6 @@ func TestDeleteFilePopupViewHandler(t *testing.T) {
 
 	t.Run("DeleteFilePopupView with file names", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/file/deleteFilePopup?name=file1.txt&name=file2.txt", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -361,9 +357,6 @@ func TestAddFilePopupViewHandler(t *testing.T) {
 
 	t.Run("AddFilePopupView renders successfully", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/file/addFilePopup", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 

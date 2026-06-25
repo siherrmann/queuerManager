@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -50,9 +49,6 @@ func TestAddJobHandler(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, "/api/job/addJob/"+task.Key, strings.NewReader("{}"))
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		// Add CSRF token to request context
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPathValues([]echo.PathValue{{Name: "taskKey", Value: task.Key}})
@@ -415,9 +411,6 @@ func TestJobViewHandler(t *testing.T) {
 		time.Sleep(50 * time.Millisecond)
 
 		req := httptest.NewRequest(http.MethodGet, "/job?rid="+job.RID.String(), nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -473,9 +466,6 @@ func TestJobsViewHandler(t *testing.T) {
 		time.Sleep(100 * time.Millisecond)
 
 		req := httptest.NewRequest(http.MethodGet, "/jobs", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -489,9 +479,6 @@ func TestJobsViewHandler(t *testing.T) {
 
 	t.Run("JobsView with search parameter", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/jobs?search=test", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -504,9 +491,6 @@ func TestJobsViewHandler(t *testing.T) {
 
 	t.Run("JobsView with lastId", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/jobs?lastId=1", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -519,9 +503,6 @@ func TestJobsViewHandler(t *testing.T) {
 
 	t.Run("JobsView with limit", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/jobs?limit=5", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 

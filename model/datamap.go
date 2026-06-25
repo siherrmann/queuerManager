@@ -14,7 +14,7 @@ type DataMap map[string]interface{}
 func (d DataMap) StripEmpty() DataMap {
 	strippedMap := DataMap{}
 	for key, value := range d {
-		if fmt.Sprintf("%v", value) != "0" && fmt.Sprintf("%v", value) != "" && fmt.Sprintf("%v", value) != "false" && key != "gorilla.csrf.Token" {
+		if fmt.Sprintf("%v", value) != "0" && fmt.Sprintf("%v", value) != "" && fmt.Sprintf("%v", value) != "false" {
 			strippedMap[key] = value
 		}
 	}

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -67,9 +66,6 @@ func TestAddJobConfigViewHandler(t *testing.T) {
 		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodGet, "/task/"+task.Key, nil)
-		// Add CSRF token to request context for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		c.SetPathValues([]echo.PathValue{{Name: "taskKey", Value: task.Key}})

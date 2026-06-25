@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -204,9 +203,6 @@ func TestJobArchiveViewHandler(t *testing.T) {
 
 	t.Run("JobArchiveView renders successfully", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/jobArchive", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -220,9 +216,6 @@ func TestJobArchiveViewHandler(t *testing.T) {
 
 	t.Run("JobArchiveView with search parameter", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/jobArchive?search=test", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 

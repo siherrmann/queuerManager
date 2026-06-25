@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"encoding/json"
 	"log/slog"
 	"net/http"
@@ -205,9 +204,6 @@ func TestWorkerViewHandler(t *testing.T) {
 		workerRID := workers[0].RID
 
 		req := httptest.NewRequest(http.MethodGet, "/worker?rid="+workerRID.String(), nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -243,9 +239,6 @@ func TestWorkersViewHandler(t *testing.T) {
 
 	t.Run("WorkersView renders successfully", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/workers", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -259,9 +252,6 @@ func TestWorkersViewHandler(t *testing.T) {
 
 	t.Run("WorkersView with search parameter", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/workers?search=test", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -274,9 +264,6 @@ func TestWorkersViewHandler(t *testing.T) {
 
 	t.Run("WorkersView with lastId", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/workers?lastId=1", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -289,9 +276,6 @@ func TestWorkersViewHandler(t *testing.T) {
 
 	t.Run("WorkersView with limit", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/workers?limit=5", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -304,9 +288,6 @@ func TestWorkersViewHandler(t *testing.T) {
 
 	t.Run("WorkersView with invalid lastId", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/workers?lastId=invalid", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 

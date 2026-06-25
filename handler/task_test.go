@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -567,9 +566,6 @@ func TestTaskViewHandler(t *testing.T) {
 		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodGet, "/task?rid="+task.RID.String(), nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -605,9 +601,6 @@ func TestTasksViewHandler(t *testing.T) {
 
 	t.Run("TasksView renders successfully", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/tasks", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -621,9 +614,6 @@ func TestTasksViewHandler(t *testing.T) {
 
 	t.Run("TasksView with search parameter", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/tasks?search=test", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -636,9 +626,6 @@ func TestTasksViewHandler(t *testing.T) {
 
 	t.Run("TasksView with lastId", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/tasks?lastId=1", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -651,9 +638,6 @@ func TestTasksViewHandler(t *testing.T) {
 
 	t.Run("TasksView with limit", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/tasks?limit=5", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -666,9 +650,6 @@ func TestTasksViewHandler(t *testing.T) {
 
 	t.Run("TasksView with invalid lastId", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/tasks?lastId=invalid", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -691,9 +672,6 @@ func TestAddTaskPopupViewHandler(t *testing.T) {
 
 	t.Run("AddTaskPopupView renders successfully", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/task/addTaskPopup", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -722,9 +700,6 @@ func TestUpdateTaskPopupViewHandler(t *testing.T) {
 		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/task/updateTaskPopup?rid="+task.RID.String(), nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -753,9 +728,6 @@ func TestDeleteTaskPopupViewHandler(t *testing.T) {
 		require.NoError(t, err)
 
 		req := httptest.NewRequest(http.MethodGet, "/api/task/deleteTaskPopup?rid="+task.RID.String(), nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
@@ -778,9 +750,6 @@ func TestImportTaskPopupViewHandler(t *testing.T) {
 
 	t.Run("ImportTaskPopupView renders successfully", func(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/api/task/importTaskPopup", nil)
-		// Add CSRF token for templ rendering
-		ctx := context.WithValue(req.Context(), "gorilla.csrf.Token", "test-csrf-token")
-		req = req.WithContext(ctx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 
